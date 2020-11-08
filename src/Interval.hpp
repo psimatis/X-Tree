@@ -1,11 +1,13 @@
 #pragma once
 #include <array>
 #include <float.h>
+#include <stdexcept>
 
 struct Interval {
+  Interval();
   Interval(float min, float max);
   Interval(const Interval& other);
-  virtual ~Interval();
+  ~Interval();
 
   float& begin();
   float begin() const;
@@ -17,13 +19,16 @@ struct Interval {
 
   void reset();
 
-  private:
-    std::array<float, 2> limits;
+ private:
+  std::array<float, 2> limits;
 };
+
+Interval::Interval() {}
 
 Interval::Interval(float min, float max) {
   if (min > max)
-    throw std::invalid_argument("Lower limit of an interval cannot be greater than the upper limit.\n");
+    throw std::invalid_argument("Lower limit of an interval cannot be greater"
+                                " than the upper limit.");
 
   this->limits[0] = min;
   this->limits[1] = max;
@@ -35,6 +40,22 @@ Interval::Interval(const Interval& other) {
 }
 
 Interval::~Interval() {}
+
+float& Interval::begin() {
+  return limits[0];
+}
+
+float Interval::begin() const {
+  return limits[0];
+}
+
+float& Interval::end() {
+  return limits[1];
+}
+
+float Interval::end() const {
+  return limits[1];
+}
 
 void Interval::reset() {
   limits[0] = FLT_MAX;

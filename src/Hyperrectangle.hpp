@@ -6,9 +6,8 @@ struct Hyperrectangle {
   typedef Interval* iterator;
   typedef const Interval* const_iterator;
 
-  Hyperrectangle(std::array<Interval, N> bounds);
-  Hyperrectangle(const Hyperrectangle& other);
-  virtual ~Hyperrectangle();
+  Interval& operator[](size_t index);
+  Interval operator[](size_t index) const;
 
   iterator begin();
   iterator end();
@@ -20,17 +19,44 @@ struct Hyperrectangle {
 
   void reset();
 
-  private:
-    std::array<Interval, N> bounds;
+ private:
+  std::array<Interval, N> bounds;
 };
 
 template <size_t N>
-Hyperrectangle<N>::Hyperrectangle(std::array<Interval, N> bounds) {
+Interval& Hyperrectangle<N>::operator[](size_t index) {
+  return bounds[index];
 }
 
 template <size_t N>
-Hyperrectangle<N>::Hyperrectangle(const Hyperrectangle& other) {
+Interval Hyperrectangle<N>::operator[](size_t index) const {
+  return bounds[index];
 }
 
 template <size_t N>
-Hyperrectangle<N>::~Hyperrectangle() {}
+typename Hyperrectangle<N>::iterator Hyperrectangle<N>::begin() {
+  return bounds.begin();
+}
+
+template <size_t N>
+typename Hyperrectangle<N>::iterator Hyperrectangle<N>::end() {
+  return bounds.end();
+}
+
+template <size_t N>
+typename Hyperrectangle<N>::const_iterator Hyperrectangle<N>::begin() const {
+  return bounds.begin();
+}
+
+template <size_t N>
+typename Hyperrectangle<N>::const_iterator Hyperrectangle<N>::end() const {
+  return bounds.end();
+}
+
+template <size_t N>
+float Hyperrectangle<N>::get_area() const {
+  return 0.f;
+}
+
+template <size_t N>
+void Hyperrectangle<N>::reset() {}
