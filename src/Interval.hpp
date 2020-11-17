@@ -35,8 +35,11 @@ Interval::Interval(float begin, float end) {
 }
 
 Interval& Interval::operator=(const Interval& other) {
-  this->limits[0] = other.limits[0];
-  this->limits[1] = other.limits[1];
+  if (this != &other) {
+    this->limits[0] = other.limits[0];
+    this->limits[1] = other.limits[1];
+  }
+
   return *this;
 }
 
