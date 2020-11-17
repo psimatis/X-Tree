@@ -5,8 +5,8 @@
 
 struct Interval {
   Interval();
-  Interval(float min, float max);
-  Interval(const Interval& other);
+  Interval(float begin, float end);
+  Interval& operator=(const Interval& other);
   ~Interval();
 
   float& begin();
@@ -25,18 +25,19 @@ struct Interval {
 
 Interval::Interval() {}
 
-Interval::Interval(float min, float max) {
-  if (min > max)
+Interval::Interval(float begin, float end) {
+  if (begin > end)
     throw std::invalid_argument("Lower limit of an interval cannot be greater"
                                 " than the upper limit.");
 
-  this->limits[0] = min;
-  this->limits[1] = max;
+  this->limits[0] = begin;
+  this->limits[1] = end;
 }
 
-Interval::Interval(const Interval& other) {
+Interval& Interval::operator=(const Interval& other) {
   this->limits[0] = other.limits[0];
-  this->limits[1] = other.limits[0];
+  this->limits[1] = other.limits[1];
+  return *this;
 }
 
 Interval::~Interval() {}
