@@ -1,51 +1,58 @@
 #pragma once
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::XNode::iterator XTree<N, ElemType, M, m>::XNode::begin() {
+typename XTree<N, ElemType, M, m>::XNode::iterator
+XTree<N, ElemType, M, m>::XNode::begin() {
   return begin(entries);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::XNode::iterator XTree<N, ElemType, M, m>::XNode::end() {
+typename XTree<N, ElemType, M, m>::XNode::iterator
+XTree<N, ElemType, M, m>::XNode::end() {
   return end(entries);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::XNode::const_iterator XTree<N, ElemType, M, m>::XNode::begin()
+typename XTree<N, ElemType, M, m>::XNode::const_iterator
+XTree<N, ElemType, M, m>::XNode::begin()
 const {
   return begin(entries);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::XNode::const_iterator XTree<N, ElemType, M, m>::XNode::end()
+typename XTree<N, ElemType, M, m>::XNode::const_iterator
+XTree<N, ElemType, M, m>::XNode::end()
 const {
   return end(entries);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::SpatialObject& XTree<N, ElemType, M, m>::XNode::operator[](
+typename XTree<N, ElemType, M, m>::SpatialObject&
+XTree<N, ElemType, M, m>::XNode::operator[](
   size_t index) {
   return entries.at(index);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::SpatialObject XTree<N, ElemType, M, m>::XNode::operator[](
+typename XTree<N, ElemType, M, m>::SpatialObject
+XTree<N, ElemType, M, m>::XNode::operator[](
   size_t index) const {
   return entries.at(index);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 bool XTree<N, ElemType, M, m>::XNode::isLeaf() {
-  if (size && entries.at(0).child_pointer)
+  if (!entries.empty() && entries.at(0).child_pointer)
     return false;
 
   return true;
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<typename XTree<N, ElemType, M, m>::XNode> XTree<N, ElemType, M, m>::XNode::insert(
+std::shared_ptr<typename XTree<N, ElemType, M, m>::XNode>
+XTree<N, ElemType, M, m>::XNode::insert(
   const SpatialObject& new_entry) {
-  if (size < M) {
+  if (entries.size() < M) {
     entries.at(size++) = new_entry;
     return nullptr;
   }
@@ -129,10 +136,10 @@ void XTree<N, ElemType, M, m>::XNode::pickSeeds(
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 void XTree<N, ElemType, M, m>::XNode::pickNext(
-                                  std::vector<SpatialObject>& entries,
-                                  size_t* idx,
-                                  const Hyperrectangle<N>& mbb_group1,
-                                  const Hyperrectangle<N>& mbb_group2) {
+  std::vector<SpatialObject>& entries,
+  size_t* idx,
+  const Hyperrectangle<N>& mbb_group1,
+  const Hyperrectangle<N>& mbb_group2) {
   float max_diff = -1.f;
   Hyperrectangle<N> enlarged_g1, enlarged_g2;
   float area_increase_g1, area_increase_g2, area_diff;

@@ -42,11 +42,10 @@ struct XTree {
     std::shared_ptr<XNode> insert(const SpatialObject& new_entry);
 
     std::vector<SpatialObject> entries;
-    size_t size = 0;
   };
 
-  // XTree();
-  // virtual ~XTree();
+  XTree();
+  virtual ~XTree();
 
   size_t dimension() const;
   size_t size() const;
@@ -83,3 +82,4 @@ struct XTree {
 };
 
 #include "XNode.tpp"
+#include "XTree.tpp"

@@ -11,7 +11,7 @@ int main() {
   for (const auto& interval : h)
     std::cout << "Interval begin: " << interval.begin() << ", interval end: " << interval.end() << "\n";
 
-  std::cout << "Hyperrectangle area: " << h.get_area() << "\n";
+  std::cout << "Hyperrectangle area: " << h.getArea() << "\n";
 
   Hyperrectangle<3> h2;
   h2 = h;
@@ -20,7 +20,7 @@ int main() {
   for (const auto& interval : h2)
     std::cout << "Interval begin: " << interval.begin() << ", interval end: " << interval.end() << "\n";
 
-  std::cout << "Hyperrectangle2 area: " << h2.get_area() << "\n";
+  std::cout << "Hyperrectangle2 area: " << h2.getArea() << "\n";
 
   XTree<3, int, 6> xt;
 }

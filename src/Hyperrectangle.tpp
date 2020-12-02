@@ -37,7 +37,7 @@ typename Hyperrectangle<N>::const_iterator Hyperrectangle<N>::end() const {
 }
 
 template <size_t N>
-float Hyperrectangle<N>::get_area() const {
+float Hyperrectangle<N>::getArea() const {
   float area = 1.f;
 
   for (const auto& interval : bounds)
