@@ -1,5 +1,5 @@
 #pragma once
-#include "interval/Interval.hpp"
+#include "Interval.hpp"
 #include <array>
 
 template <size_t N>

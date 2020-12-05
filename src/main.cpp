@@ -1,6 +1,6 @@
 #include <iostream>
-#include "hyperrectangle/Hyperrectangle.hpp"
-#include "xtree/XTree.hpp"
+#include "Hyperrectangle.hpp"
+#include "XTree.hpp"
 
 int main() {
   Hyperrectangle<3> h;

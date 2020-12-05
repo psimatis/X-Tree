@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 
-#include "hyperrectangle/Hyperrectangle.hpp"
+#include "Hyperrectangle.hpp"
 
 template <size_t N, typename ElemType, size_t M, size_t m = M / 2>
 struct XTree {

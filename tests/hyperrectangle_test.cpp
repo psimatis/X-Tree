@@ -1,14 +1,14 @@
-#include "xtree/XTree.hpp"
+#include "Hyperrectangle.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 namespace Tests {
 
-class XTreeTest : public ::testing::Test {
+class HyperrectangleTest : public ::testing::Test {
  protected:
-  XTreeTest() {}
-  virtual ~XTreeTest() {}
+  HyperrectangleTest() {}
+  virtual ~HyperrectangleTest() {}
 
   void SetUp() override {}
   void TearDown() override {}
@@ -40,10 +40,10 @@ class XTreeTest : public ::testing::Test {
 
 // int SmartPointerTest::Counter::num_of_instances_ = 0;
 
-TEST_F(XTreeTest, ConstructorTest) {
-  XTree<2, int, 6> xtree;
-  EXPECT_EQ(xtree.size(), size_t(0))
-    << "The size of a new xtree should equal zero.";
+TEST_F(HyperrectangleTest, ConstructorTest) {
+  // XTree<2, int, 6> xtree;
+  // EXPECT_EQ(xtree.size(), size_t(1))
+    // << "The size of a new xtree should equal zero.";
 }
 
 // TEST_F(SmartPointerTest, ConstructorFuncionality) {

@@ -14,8 +14,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 enable_testing()
 
-add_subdirectory(src/interval)
-add_subdirectory(src/hyperrectangle)
-add_subdirectory(src/xtree)
+# add_subdirectory(src/interval)
+# add_subdirectory(src/hyperrectangle)
+# add_subdirectory(src/xtree)
+add_subdirectory(tests)
 
 add_executable(x_tree src/main.cpp)

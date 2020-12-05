@@ -1,14 +1,14 @@
-#include "interval/Interval.hpp"
+#include "XTree.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 namespace Tests {
 
-class IntervalTest : public ::testing::Test {
+class XTreeTest : public ::testing::Test {
  protected:
-  IntervalTest() {}
-  virtual ~IntervalTest() {}
+  XTreeTest() {}
+  virtual ~XTreeTest() {}
 
   void SetUp() override {}
   void TearDown() override {}
@@ -40,10 +40,10 @@ class IntervalTest : public ::testing::Test {
 
 // int SmartPointerTest::Counter::num_of_instances_ = 0;
 
-TEST_F(IntervalTest, ConstructorTest) {
-  // XTree<2, int, 6> xtree;
-  // EXPECT_EQ(xtree.size(), size_t(1))
-    // << "The size of a new xtree should equal zero.";
+TEST_F(XTreeTest, ConstructorTest) {
+  XTree<2, int, 6> xtree;
+  EXPECT_EQ(xtree.size(), size_t(0))
+    << "The size of a new xtree should equal zero.";
 }
 
 // TEST_F(SmartPointerTest, ConstructorFuncionality) {
