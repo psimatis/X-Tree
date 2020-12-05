@@ -18,7 +18,7 @@ struct Hyperrectangle {
   const_iterator begin() const;
   const_iterator end() const;
 
-  float get_area() const;
+  float getArea() const;
 
   void reset();
 
