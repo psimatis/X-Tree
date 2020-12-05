@@ -42,7 +42,7 @@ XTree<N, ElemType, M, m>::XNode::operator[](
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 bool XTree<N, ElemType, M, m>::XNode::isLeaf() {
-  if (!entries.empty() && entries.at(0).child_pointer)
+  if (!entries.empty() && entries.at(0).child_pointer != nullptr)
     return false;
 
   return true;

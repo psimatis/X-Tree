@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+
+add_executable(hyperrectangle_test hyperrectangle_test.cpp)
+
+target_link_libraries(hyperrectangle_test gtest_main)
+target_link_libraries(hyperrectangle_test gmock_main)
+
+add_test(hyperrectangle_test hyperrectangle_test)
