@@ -53,7 +53,7 @@ std::shared_ptr<typename XTree<N, ElemType, M, m>::XNode>
 XTree<N, ElemType, M, m>::XNode::insert(
   const SpatialObject& new_entry) {
   if (entries.size() < M) {
-    entries.at(size++) = new_entry;
+    entries.push_back(new_entry);
     return nullptr;
   }
 

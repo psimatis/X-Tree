@@ -15,7 +15,7 @@ struct Interval {
   float& end();
   float end() const;
 
-  float get_range() const;
+  float getRange() const;
 
   void reset();
 
@@ -61,7 +61,11 @@ float Interval::end() const {
   return limits[1];
 }
 
+float Interval::getRange() const {
+  return end() - begin();
+}
+
 void Interval::reset() {
   limits[0] = FLT_MAX;
-  limits[1] = FLT_MIN;
+  limits[1] = -FLT_MAX;
 }
