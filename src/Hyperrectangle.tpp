@@ -55,7 +55,7 @@ void Hyperrectangle<N>::reset() {
 template <size_t N>
 void Hyperrectangle<N>::adjust(const Hyperrectangle& other) {
   for (size_t i = 0; i < N; ++i) {
-    (*this).at(i).begin() = std::min((*this)[i].begin(), other[i].begin());
-    (*this).at(i).end() = std::min((*this)[i].end(), other[i].end());
+    (*this)[i].begin() = std::min((*this)[i].begin(), other[i].begin());
+    (*this)[i].end() = std::max((*this)[i].end(), other[i].end());
   }
 }

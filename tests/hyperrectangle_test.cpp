@@ -1,4 +1,5 @@
 #include "Hyperrectangle.hpp"
+#include "float.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -12,223 +13,109 @@ class HyperrectangleTest : public ::testing::Test {
 
   void SetUp() override {}
   void TearDown() override {}
-
-  /* Clase que almacena el numero de instancias activas (sólo es para las
-   * pruebas). */
-  // class Counter {
-   // public:
-    // Counter() : value_(0) { ++num_of_instances_; }
-    // ~Counter() { --num_of_instances_; }
-//
-    // static int GetNumInstances() { return num_of_instances_; }
-//
-    // static void ResetNumInstances() { num_of_instances_ = 0; }
-//
-    // int GetValue() const { return value_; }
-//
-    // void SetValue(int value) { this->value_ = value; }
-//
-   // private:
-    // static int num_of_instances_;
-    // int value_;
-//
-    // Convirtiéndolo en un tipo "no copiable"
-    // Counter(const Counter &other);
-    // Counter &operator=(const Counter &other);
-  // };
 };
 
-// int SmartPointerTest::Counter::num_of_instances_ = 0;
-
 TEST_F(HyperrectangleTest, ConstructorTest) {
-  // XTree<2, int, 6> xtree;
-  // EXPECT_EQ(xtree.size(), size_t(1))
-    // << "The size of a new xtree should equal zero.";
+  Hyperrectangle<3> hr;
+  hr[0] = Interval(3.f, 6.f);
+  hr[1] = Interval(-2.f, 5.7f);
+  hr[2] = Interval(-12.3f, -4.f);
+  EXPECT_FLOAT_EQ(hr[0].begin(), 3.f)
+      << "The first interval of the hyperrectangle should begin at 3.";
+  EXPECT_FLOAT_EQ(hr[0].end(), 6.f)
+      << "The first interval of the hyperrectangle should end at 6.";
+  EXPECT_FLOAT_EQ(hr[1].begin(), -2.f)
+      << "The second interval of the hyperrectangle should begin at -2.";
+  EXPECT_FLOAT_EQ(hr[1].end(), 5.7f)
+      << "The second interval of the hyperrectangle should end at 5.7.";
+  EXPECT_FLOAT_EQ(hr[2].begin(), -12.3f)
+      << "The third interval of the hyperrectangle should begin at -12.3.";
+  EXPECT_FLOAT_EQ(hr[2].end(), -4.f)
+      << "The third interval of the hyperrectangle should end at -4.";
 }
 
-// TEST_F(SmartPointerTest, ConstructorFuncionality) {
-  // SmartPointerTest::Counter::ResetNumInstances();
-  // {
-    // SmartPointer<Counter> basic_pointer(new Counter);
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(1))
-        // << "El conteo de referencias del nuevo puntero debería ser uno.";
-    // EXPECT_NE(basic_pointer.GetPointer(), nullptr)
-        // << "El recurso almacenado de basic_pointer debería ser no-nullptr.";
-    // EXPECT_EQ(Counter::GetNumInstances(), 1)
-        // << "Debería haber exactamente una instancia activa de la clase "
-           // "Counter.";
-    // basic_pointer.GetPointer()->SetValue(125);
-//
-    // EXPECT_EQ(basic_pointer.GetPointer()->GetValue(), 125)
-        // << "El valor almacenado debería ser 137";
-  // }
-  // EXPECT_EQ(SmartPointerTest::Counter::GetNumInstances(), 0)
-      // << "No debería haber ninguna instancia en Counter.";
-// }
-//
-// TEST_F(SmartPointerTest, SingleResource) {
-  // SmartPointerTest::Counter::ResetNumInstances();
-  // {
-    // SmartPointer<Counter> basic_pointer(new Counter);
-    // SmartPointer<Counter> copy_pointer = basic_pointer;
-    // EXPECT_EQ(SmartPointerTest::Counter::GetNumInstances(), 1)
-        // << "Solo debería haber una instancia de la clase Counter.";
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(2))
-        // << "deberían existir 2 shared pointers.";
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(2))
-        // << "copy_pointer debería tener un conteo de referencias de 2.";
-    // EXPECT_EQ(basic_pointer.GetPointer(), copy_pointer.GetPointer())
-        // << "Los dos punteros deberían almacenar el mismo recurso.";
-  // }
-  // EXPECT_EQ(SmartPointerTest::Counter::GetNumInstances(), 0)
-      // << "No debería haber ninguna instancia en Counter.";
-// }
-//
-// TEST_F(SmartPointerTest, DifferentResource) {
-  // SmartPointerTest::Counter::ResetNumInstances();
-  // {
-    // SmartPointer<Counter> basic_pointer(new Counter);
-    // SmartPointer<Counter> copy_pointer(new Counter);
-    // EXPECT_EQ(SmartPointerTest::Counter::GetNumInstances(), 2)
-        // << "Deberían existir solo 2 objetos Counter.";
-    // copy_pointer = basic_pointer;
-    // EXPECT_EQ(SmartPointerTest::Counter::GetNumInstances(), 1)
-        // << "Debería existir solo un ojeto Counter.";
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(2))
-        // << "Deberían existir 2 smart pointers.";
-    // EXPECT_EQ(copy_pointer.GetReferenceCount(), size_t(2))
-        // << "copy_pointer debería tener un conteo de referencias de 2.";
-    // EXPECT_EQ(basic_pointer.GetPointer(), copy_pointer.GetPointer())
-        // << "Los dos punteros deberían almacenar el mismo recurso.";
-  // }
-  // EXPECT_EQ(SmartPointerTest::Counter::GetNumInstances(), 0)
-      // << "No debería haber ninguna instancia en Counter.";
-// }
-//
-// TEST_F(SmartPointerTest, ChangeResource) {
-  // SmartPointerTest::Counter::ResetNumInstances();
-  // {
-    // SmartPointer<Counter> basic_pointer(new Counter);
-    // SmartPointer<Counter> copy_pointer = basic_pointer;
-//
-    // EXPECT_EQ(Counter::GetNumInstances(), 1)
-        // << "Debería existir solo un ojeto Counter.";
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(2))
-       // << "Deberían existir solo 2 objetos Counter.";
-    // EXPECT_EQ(copy_pointer.GetReferenceCount(), size_t(2))
-        // << "copy_pointer debería tener un conteo de referencias de 2.";
-    // EXPECT_EQ(basic_pointer.GetPointer(), copy_pointer.GetPointer())
-        // << "Los dos punteros deberían almacenar el mismo recurso.";
-//
-    // basic_pointer = new Counter();
-//
-    // EXPECT_EQ(Counter::GetNumInstances(), 2)
-        // << "Deberían existir 2 objetos Counter";
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(1))
-        // << "El conteo de referencias del puntero original debería ser 1.";
-    // EXPECT_EQ(copy_pointer.GetReferenceCount(), size_t(1))
-        // << "El conteo de referencias del puntero copia debería ser 1.";
-    // EXPECT_NE(basic_pointer.GetPointer(), copy_pointer.GetPointer())
-        // << "Los dos punteros no deberían almacenar el mismo recurso.";
-  // }
-  // EXPECT_EQ(Counter::GetNumInstances(), 0)
-      // << "No deberían existir instancias de Counter.";
-// }
-//
-// TEST_F(SmartPointerTest, SelfAssignment) {
-  // SmartPointerTest::Counter::ResetNumInstances();
-  // {
-    // SmartPointer<Counter> basic_pointer(new Counter);
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(1))
-        // << "El conteo de referencias debería ser 1.";
-    // EXPECT_NE(basic_pointer.GetPointer(), nullptr)
-        // << "El recurso almacenado por basic_pointer debería ser no-NULL.";
-    // EXPECT_EQ(Counter::GetNumInstances(), 1)
-        // << "Debería existir exactamente una instancia activa de la clase "
-           // "Counter.";
-//
-    // Counter *old_value = basic_pointer.GetPointer();
-    // basic_pointer = basic_pointer;  // Self-assign.
-//
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(1))
-        // << "El conteo de referencias debería ser exactamente 1.";
-    // EXPECT_NE(basic_pointer.GetPointer(), nullptr)
-        // << "El recurso almacenado por basic_pointer debería ser no-NULL.";
-    // EXPECT_EQ(Counter::GetNumInstances(), 1)
-        // << "Debería existir exactamente una instancia activa de la clase "
-           // "Counter.";
-    // EXPECT_EQ(basic_pointer.GetPointer(), old_value)
-        // << "Después de la auto-asignación debería ser el mismo puntero.";
-  // }
-  // EXPECT_EQ(Counter::GetNumInstances(), 0)
-      // << "No deberían existir instancias de Counter.";
-// }
-//
-// TEST_F(SmartPointerTest, ChainedAssignment) {
-  // SmartPointerTest::Counter::ResetNumInstances();
-  // {
-    // SmartPointer<Counter> basic_pointer(new Counter);
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(1))
-        // << "El conteo de referencias del nuevo puntero debería ser uno.";
-    // EXPECT_NE(basic_pointer.GetPointer(), nullptr)
-        // << "El recurso almacenado por basic_pointer debería ser no-NULL.";
-    // EXPECT_EQ(Counter::GetNumInstances(), 1)
-        // << "Debería existir exactamente una instancia activa de la clase "
-           // "Counter.";
-//
-    // Counter *old_value = basic_pointer.GetPointer();
-    // SmartPointer<Counter> two(new Counter), three(new Counter);
-    // EXPECT_EQ(Counter::GetNumInstances(), 3)
-        // << "Deberían existir exactamente 3 instancias activas de la clase "
-           // "Counter.";
-//
-//
-    // three = two = basic_pointer;  // Chained Assign.
-//
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(3))
-        // << "El conteo de referencias debería ser 1.";
-    // EXPECT_NE(basic_pointer.GetPointer(), nullptr)
-        // << "El recurso almacenado por basic_pointer debería ser no-NULL.";
-    // EXPECT_EQ(Counter::GetNumInstances(), 1)
-        // << "Debería existir exactamente una instancia activa de la clase "
-           // "Counter.";
-    // EXPECT_EQ(basic_pointer.GetPointer(), three.GetPointer())
-        // << "El primer puntero debería ser igual al tercer puntero.";
-    // EXPECT_EQ(basic_pointer.GetPointer(), two.GetPointer())
-        // << "El primer puntero debería ser igual al segundo puntero.";
-//
-    // old_value = basic_pointer.GetPointer();
-//
-    // basic_pointer = new Counter();
-//
-    // EXPECT_EQ(Counter::GetNumInstances(), 2)
-        // << "Deberían existir exactamente 2 instancias activas de la clase "
-           // "Counter.";
-    // EXPECT_EQ(basic_pointer.GetReferenceCount(), size_t(1))
-        // << "El conteo de referencias del puntero original debería ser uno.";
-    // EXPECT_NE(basic_pointer.GetPointer(), old_value)
-        // << "El puntero original no debería tener el valor original.";
-    // EXPECT_EQ(two.GetPointer(), old_value)
-        // << "El segundo puntero debería tener el mismo valor que el original.";
-    // EXPECT_EQ(three.GetPointer(), old_value)
-        // << "El tercer puntero debería tener el mismo valor que el original.";
-//
-    // three.Detach();
-    // three = new Counter();
-//
-    // EXPECT_EQ(Counter::GetNumInstances(), 3)
-        // << "Deberían existir exactamente 3 instancias activas de la clase "
-           // "Counter.";
-    // EXPECT_EQ(three.GetReferenceCount(), size_t(1))
-        // << "El conteo de referencias del tercer puntero debería ser uno.";
-    // EXPECT_EQ(two.GetReferenceCount(), size_t(1))
-        // << "El conteo de referencias del segundo puntero debería ser uno.";
-    // EXPECT_NE(three.GetPointer(), old_value)
-        // << "El tercer puntero no debería tener el valor original.";
-    // EXPECT_EQ(two.GetPointer(), old_value)
-        // << "El segundo puntero debría tener el mismo valor que el original.";
-  // }
-  // EXPECT_EQ(Counter::GetNumInstances(), 0)
-      // << "No debería existir ninguna instancia de la clase Counter.";
-// }
-}  // namespace Tests 
+TEST_F(HyperrectangleTest, OperatorEqualsTest) {
+  Hyperrectangle<3> hr1;
+  hr1[0] = Interval(3.f, 6.f);
+  hr1[1] = Interval(-2.f, 5.7f);
+  hr1[2] = Interval(-12.3f, -4.f);
+  Hyperrectangle<3> hr2 = hr1;
+
+  for (int i = 0; i < 3; ++i) {
+    EXPECT_FLOAT_EQ(hr1[i].begin(), hr2[i].begin())
+        << "The beginning of interval " << i <<
+        " of hr2 should be equal to the beginning of hr1.";
+    EXPECT_FLOAT_EQ(hr1[i].end(), hr2[i].end())
+        << "The end of interval " << i << " of hr2 should be equal to the end of hr1.";
+  }
+}
+
+TEST_F(HyperrectangleTest, GetAreaTest) {
+  Hyperrectangle<4> hr;
+  hr[0] = Interval(-2.f, 6.f);
+  hr[1] = Interval(5.f, 8.f);
+  hr[2] = Interval(-4.f, 1.f);
+  hr[3] = Interval(-10.f, -7.f);
+  EXPECT_FLOAT_EQ(hr.getArea(), 360.f)
+      << "The area of the hyperrectangle should equal 360.";
+}
+
+TEST_F(HyperrectangleTest, ResetTest) {
+  Hyperrectangle<2> hr;
+  hr[0] = Interval(-3.f, 7.f);
+  hr[1] = Interval(0.04f, 0.12f);
+  hr.reset();
+  EXPECT_FLOAT_EQ(hr[0].begin(), FLT_MAX)
+      << "The value for the reset beginning of interval 0 should equal FLT_MAX.";
+  EXPECT_FLOAT_EQ(hr[0].end(), -FLT_MAX)
+      << "The value for the reset end of interval 0 should equal -FLT_MAX.";
+  EXPECT_FLOAT_EQ(hr[1].begin(), FLT_MAX)
+      << "The value for the reset beginning of interval 1 should equal FLT_MAX.";
+  EXPECT_FLOAT_EQ(hr[1].end(), -FLT_MAX)
+      << "The value for the reset end of interval 1 should equal -FLT_MAX.";
+}
+
+TEST_F(HyperrectangleTest, AdjustTest) {
+  Hyperrectangle<2> hr1;
+  hr1[0] = Interval(1.f, 5.f);
+  hr1[1] = Interval(1.f, 5.f);
+  // Adjust lower limit
+  Hyperrectangle<2> hr2;
+  hr2[0] = Interval(0.f, 5.f);
+  hr2[1] = Interval(0.f, 3.f);
+  hr1.adjust(hr2);
+  EXPECT_FLOAT_EQ(hr1[0].begin(), 0.f)
+      << "The adjusted begin of interval 0 of hr1 should be 0.";
+  EXPECT_FLOAT_EQ(hr1[0].end(), 5.f)
+      << "The adjusted end of interval 0 of hr1 should remain 5.";
+  EXPECT_FLOAT_EQ(hr1[1].begin(), 0.f)
+      << "The adjusted begin of interval 1 of hr1 should be 0.";
+  EXPECT_FLOAT_EQ(hr1[1].end(), 5.f)
+      << "The adjusted end of interval 1 of hr1 should remain 5.";
+  // Adjust upper limit
+  hr2[0] = Interval(0.f, 7.f);
+  hr2[1] = Interval(3.f, 8.5f);
+  hr1.adjust(hr2);
+  EXPECT_FLOAT_EQ(hr1[0].begin(), 0.f)
+      << "The adjusted begin of interval 0 of hr1 should remain 0.";
+  EXPECT_FLOAT_EQ(hr1[0].end(), 7.f)
+      << "The adjusted end of interval 0 of hr1 should be 7.";
+  EXPECT_FLOAT_EQ(hr1[1].begin(), 0.f)
+      << "The adjusted begin of interval 1 of hr1 should remain 0.";
+  EXPECT_FLOAT_EQ(hr1[1].end(), 8.5f)
+      << "The adjusted end of interval 1 of hr1 should be 8.5.";
+  // Adjust both limits
+  hr2[0] = Interval(-5.5f, 10.5f);
+  hr2[1] = Interval(-15.5f, 15.5f);
+  hr1.adjust(hr2);
+  EXPECT_FLOAT_EQ(hr1[0].begin(), -5.5f)
+      << "The adjusted begin of interval 0 of hr1 should be -5.5.";
+  EXPECT_FLOAT_EQ(hr1[0].end(), 10.5f)
+      << "The adjusted end of interval 0 of hr1 should be 10.5.";
+  EXPECT_FLOAT_EQ(hr1[1].begin(), -15.5f)
+      << "The adjusted begin of interval 1 of hr1 should be -15.5.";
+  EXPECT_FLOAT_EQ(hr1[1].end(), 15.5f)
+      << "The adjusted end of interval 1 of hr1 should be 15.5.";
+}
+
+}  // namespace Tests
