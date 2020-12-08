@@ -1,29 +1,34 @@
 #pragma once
 
 template <size_t N, typename ElemType, size_t M, size_t m>
+XTree<N, ElemType, M, m>::XNode::XNode() : size(0) {
+  this->entries.resize(M);
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
 typename XTree<N, ElemType, M, m>::XNode::iterator
 XTree<N, ElemType, M, m>::XNode::begin() {
-  return begin(entries);
+  return entries.begin();
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 typename XTree<N, ElemType, M, m>::XNode::iterator
 XTree<N, ElemType, M, m>::XNode::end() {
-  return end(entries);
+  return entries.begin() + size;
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 typename XTree<N, ElemType, M, m>::XNode::const_iterator
 XTree<N, ElemType, M, m>::XNode::begin()
 const {
-  return begin(entries);
+  return entries.begin();
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 typename XTree<N, ElemType, M, m>::XNode::const_iterator
 XTree<N, ElemType, M, m>::XNode::end()
 const {
-  return end(entries);
+  return entries.begin() + size;
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
@@ -52,8 +57,8 @@ template <size_t N, typename ElemType, size_t M, size_t m>
 std::shared_ptr<typename XTree<N, ElemType, M, m>::XNode>
 XTree<N, ElemType, M, m>::XNode::insert(
   const SpatialObject& new_entry) {
-  if (entries.size() < M) {
-    entries.push_back(new_entry);
+  if (size < M) {
+    entries[size++] = new_entry;
     return nullptr;
   }
 
@@ -75,11 +80,11 @@ XTree<N, ElemType, M, m>::XNode::insert(
   size_t idx;
 
   while (!entries.empty()) {
-    if (this->size + entries.size() == m) {
+    if (size + entries.size() == m) {
       for (auto& e : entries) this->insert(e);
 
       entries.clear();
-    } else if (new_node->size + entries.size() == m) {
+    } else if (new_node->entries.size() + entries.size() == m) {
       for (auto& e : entries) new_node->insert(e);
 
       entries.clear();
@@ -87,17 +92,17 @@ XTree<N, ElemType, M, m>::XNode::insert(
       pickNext(entries, &idx, mbb_group1, mbb_group2);
       enlarged_mbb_g1 = mbb_group1;
       enlarged_mbb_g1.adjust(entries.at(idx).box);
-      area_increase_g1 = enlarged_mbb_g1.get_area() - mbb_group1.get_area();
+      area_increase_g1 = enlarged_mbb_g1.getArea() - mbb_group1.getArea();
       enlarged_mbb_g2 = mbb_group2;
       enlarged_mbb_g2.adjust(entries.at(idx).box);
-      area_increase_g2 = enlarged_mbb_g2.get_area() - mbb_group2.get_area();
+      area_increase_g2 = enlarged_mbb_g2.getArea() - mbb_group2.getArea();
 
       if (area_increase_g1 < area_increase_g2 ||
           (area_increase_g1 == area_increase_g2 &&
-           mbb_group1.get_area() < mbb_group2.get_area()) ||
+           mbb_group1.getArea() < mbb_group2.getArea()) ||
           (area_increase_g1 == area_increase_g2 &&
-           mbb_group1.get_area() == mbb_group2.get_area() &&
-           size <= new_node->size)) {
+           mbb_group1.getArea() == mbb_group2.getArea() &&
+           size <= new_node->entries.size())) {
         mbb_group1.adjust(entries.at(idx).box);
         this->insert(entries.at(idx));
       } else {
@@ -122,8 +127,8 @@ void XTree<N, ElemType, M, m>::XNode::pickSeeds(
     for (size_t j = i + 1; j < M + 1; ++j) {
       enlargement_box = entries.at(i).box;
       enlargement_box.adjust(entries.at(j).box);
-      area = enlargement_box.get_area() - entries.at(i).box.get_area() -
-             entries.at(j).box.get_area();
+      area = enlargement_box.getArea() - entries.at(i).box.getArea() -
+             entries.at(j).box.getArea();
 
       if (area > max_waste) {
         max_waste = area;
@@ -147,10 +152,10 @@ void XTree<N, ElemType, M, m>::XNode::pickNext(
   for (size_t i = 0; i < entries.size(); ++i) {
     enlarged_g1 = mbb_group1;
     enlarged_g1.adjust(entries.at(i).box);
-    area_increase_g1 = enlarged_g1.get_area() - mbb_group1.get_area();
+    area_increase_g1 = enlarged_g1.getArea() - mbb_group1.getArea();
     enlarged_g2 = mbb_group2;
     enlarged_g2.adjust(entries.at(i).box);
-    area_increase_g2 = enlarged_g2.get_area() - mbb_group2.get_area();
+    area_increase_g2 = enlarged_g2.getArea() - mbb_group2.getArea();
     area_diff = std::abs(area_increase_g1 - area_increase_g2);
 
     if (area_diff > max_diff) {

@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <float.h>
 
 #include "Hyperrectangle.hpp"
 
@@ -15,10 +16,10 @@ struct XTree {
   };
 
   struct XNode {
-    typedef SpatialObject* iterator;
-    typedef const SpatialObject* const_iterator;
+    typedef typename std::vector<SpatialObject>::iterator iterator;
+    typedef typename std::vector<SpatialObject>::const_iterator const_iterator;
 
-    // XNode();
+    XNode();
     // XNode(const XNode& other);
     // XNode operator=(const XNode& other);
     // ~XNode();
@@ -42,6 +43,7 @@ struct XTree {
     std::shared_ptr<XNode> insert(const SpatialObject& new_entry);
 
     std::vector<SpatialObject> entries;
+    size_t size;
   };
 
   XTree();
@@ -51,8 +53,8 @@ struct XTree {
   size_t size() const;
   bool empty() const;
 
-  class Point;
-  std::shared_ptr<XNode> choose_subtree(const Point& point);
+  // class Point;
+  // std::shared_ptr<XNode> choose_subtree(const Point& point);
   // split();
   // topological_split();
   // choose_split_index();
@@ -74,7 +76,7 @@ struct XTree {
                                     const std::shared_ptr<XNode>& right,
                                     SpatialObject* entry);
 
-  std::vector<ElemType>& kNN(const Point& point);
+  // std::vector<ElemType>& kNN(const Point& point);
 
   std::shared_ptr<XNode> root;
   size_t entry_count;

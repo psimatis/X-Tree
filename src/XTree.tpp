@@ -1,5 +1,5 @@
 #pragma once
-#include <climits>
+#include <float.h>
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 XTree<N, ElemType, M, m>::XTree()
@@ -33,9 +33,9 @@ void XTree<N, ElemType, M, m>::insert(const Hyperrectangle<N>& box,
     return;
 
   auto new_root = std::make_shared<XNode>();
-  new_root->entry[0].child_pointer = root;
+  new_root->entries[0].child_pointer = root;
   ++new_root->size;
-  adjust_tree(new_root, root, split_node, &new_root->entry[0]);
+  adjustTree(new_root, root, split_node, &new_root->entries[0]);
   root = new_root;
 }
 
@@ -45,7 +45,7 @@ int getMinOverlapHyperrectangle(std::shared_ptr<typename XTree<N, ElemType, M, m
   auto entries = &node->entries;
   int idx;
   float minOverlap, minArea, minBoxArea;
-  minOverlap = minArea = minBoxArea = INT_MAX;
+  minOverlap = minArea = minBoxArea = FLT_MAX;
   for (int i = 0; i < entries->size(); ++i) {
     auto hr = entries.at(i);
     auto overlap = getTotalOverlap(hr);
@@ -53,8 +53,8 @@ int getMinOverlapHyperrectangle(std::shared_ptr<typename XTree<N, ElemType, M, m
     auto boxArea = hr.box.getArea();
 
     if (overlap < minOverlap ||
-        overlap == minOverlap && areaEnlargement < minArea ||
-        overlap == minOverlap && areaEnlargement < minArea && boxArea < minBoxArea) {
+        (overlap == minOverlap && areaEnlargement < minArea) ||
+        (overlap == minOverlap && areaEnlargement < minArea && boxArea < minBoxArea)) {
       idx = i;
       minOverlap = overlap;
       minArea = areaEnlargement;
@@ -72,9 +72,9 @@ XTree<N, ElemType, M, m>::chooseLeaf(
   const Hyperrectangle<N>& box,
   const ElemType& value) {
   if (!current_node->isLeaf()) {
-    if (current_node[0].child_pointer->isLeaf()) {
-      auto least_overlap_enlargement_hyperrectangle = getMinOverlapHyperrectangle(current_node);
-    }
+    // if ((*current_node)[0].child_pointer->isLeaf()) {
+      // auto least_overlap_enlargement_hyperrectangle = getMinOverlapHyperrectangle(current_node);
+    // }
     SpatialObject* entry;
     auto next_node = chooseNode(current_node, box, entry);
     auto split_node = chooseLeaf(next_node, box, value);
