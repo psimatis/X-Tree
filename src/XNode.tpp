@@ -66,33 +66,37 @@ XTree<N, ElemType, M, m>::XNode::insert(
   std::copy(begin(), end(), entries.begin());
   entries.at(M) = new_entry;
   this->size = 0;
+
   size_t first, second;
   pickSeeds(entries, &first, &second);
+
   this->insert(entries.at(first));
   auto new_node = std::make_shared<XNode>();
   new_node->insert(entries.at(second));
+
   auto mbb_group1 = entries.at(first).box;
   auto mbb_group2 = entries.at(second).box;
+
   entries.erase(entries.begin() + first);
   entries.erase(entries.begin() + second - 1);
+
   float area_increase_g1, area_increase_g2;
   Hyperrectangle<N> enlarged_mbb_g1, enlarged_mbb_g2;
   size_t idx;
-
   while (!entries.empty()) {
     if (size + entries.size() == m) {
       for (auto& e : entries) this->insert(e);
-
       entries.clear();
     } else if (new_node->entries.size() + entries.size() == m) {
       for (auto& e : entries) new_node->insert(e);
-
       entries.clear();
     } else {
       pickNext(entries, &idx, mbb_group1, mbb_group2);
+
       enlarged_mbb_g1 = mbb_group1;
       enlarged_mbb_g1.adjust(entries.at(idx).box);
       area_increase_g1 = enlarged_mbb_g1.getArea() - mbb_group1.getArea();
+
       enlarged_mbb_g2 = mbb_group2;
       enlarged_mbb_g2.adjust(entries.at(idx).box);
       area_increase_g2 = enlarged_mbb_g2.getArea() - mbb_group2.getArea();
@@ -153,9 +157,11 @@ void XTree<N, ElemType, M, m>::XNode::pickNext(
     enlarged_g1 = mbb_group1;
     enlarged_g1.adjust(entries.at(i).box);
     area_increase_g1 = enlarged_g1.getArea() - mbb_group1.getArea();
+
     enlarged_g2 = mbb_group2;
     enlarged_g2.adjust(entries.at(i).box);
     area_increase_g2 = enlarged_g2.getArea() - mbb_group2.getArea();
+
     area_diff = std::abs(area_increase_g1 - area_increase_g2);
 
     if (area_diff > max_diff) {

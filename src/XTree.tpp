@@ -40,12 +40,14 @@ void XTree<N, ElemType, M, m>::insert(const Hyperrectangle<N>& box,
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-int getMinOverlapHyperrectangle(std::shared_ptr<typename XTree<N, ElemType, M, m>::XNode> node,
-    const Hyperrectangle<N>& box) {
+int getMinOverlapHyperrectangle(
+  std::shared_ptr<typename XTree<N, ElemType, M, m>::XNode> node,
+  const Hyperrectangle<N>& box) {
   auto entries = &node->entries;
   int idx;
   float minOverlap, minArea, minBoxArea;
   minOverlap = minArea = minBoxArea = FLT_MAX;
+
   for (int i = 0; i < entries->size(); ++i) {
     auto hr = entries.at(i);
     auto overlap = getTotalOverlap(hr);
@@ -73,7 +75,7 @@ XTree<N, ElemType, M, m>::chooseLeaf(
   const ElemType& value) {
   if (!current_node->isLeaf()) {
     // if ((*current_node)[0].child_pointer->isLeaf()) {
-      // auto least_overlap_enlargement_hyperrectangle = getMinOverlapHyperrectangle(current_node);
+    // auto least_overlap_enlargement_hyperrectangle = getMinOverlapHyperrectangle(current_node);
     // }
     SpatialObject* entry;
     auto next_node = chooseNode(current_node, box, entry);
@@ -94,15 +96,19 @@ XTree<N, ElemType, M, m>::chooseNode(
   const Hyperrectangle<N>& box,
   SpatialObject*& entry) {
   float minimum_area = (*current_node)[0].box.getArea();
+
   Hyperrectangle<N> enlarged_box = (*current_node)[0].box;
   enlarged_box.adjust(box);
   float minimum_enlargement = enlarged_box.getArea() - minimum_area;
+
   float enlargement, area;
   std::shared_ptr<XNode> node = (*current_node)[0].child_pointer;
+
   entry = &(*current_node)[0];
 
   for (SpatialObject& current_entry : *current_node) {
     area = current_entry.box.getArea();
+
     enlarged_box = current_entry.box;
     enlarged_box.adjust(box);
     enlargement = enlarged_box.getArea() - area;
