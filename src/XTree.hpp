@@ -42,7 +42,7 @@ struct XTree {
                   const Hyperrectangle<N>& mbb_group2);
 
     std::shared_ptr<XNode> insert(const SpatialObject& new_entry);
-    size_t chooseSplitAxis();
+    size_t chooseSplitAxis(const SpatialObject& new_entry);
 
     std::vector<SpatialObject> entries;
     size_t size;

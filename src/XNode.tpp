@@ -46,11 +46,12 @@ bool XNODE::isLeaf() {
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-size_t XNODE::chooseSplitAxis() {
-  std::vector<SpatialObject*> entries(this->size);
+size_t XNODE::chooseSplitAxis(const SpatialObject& new_entry) {
+  std::vector<const SpatialObject*> entries(this->size + 1);
 
-  for (size_t i = 0; i < this->size; ++i)
+  for (size_t i = 0; i < M; ++i)
     entries[i] = &(*this)[i];
+  entries[M] = &new_entry;
 
   size_t k = M - 2*m + 2;
   Hyperrectangle<N> first_group_hr, second_group_hr;
@@ -62,39 +63,16 @@ size_t XNODE::chooseSplitAxis() {
 
   for (size_t i = 0; i < N; ++i) {
     std::sort(entries.begin(), entries.end(),
-    [i](const SpatialObject*& lhs, const SpatialObject*& rhs) {
+    [&](const SpatialObject*& lhs, const SpatialObject*& rhs) {
       return lhs->box[i].begin() < rhs->box[i].begin();
     });
 
     for (size_t j = 1; j <= k; ++j) {
       for (size_t f1 = 0; f1 < m - 1 + j; ++f1)
-        first_group_hr.adjust(entries[f1].box);
+        first_group_hr.adjust(entries[f1]->box);
 
       for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2)
-        second_group_hr.adjust(entries[f2].box);
-
-      auto first_group_area = first_group_hr.getArea();
-      auto second_group_area = second_group_hr.getArea();
-      auto group_overlap = overlap(first_group_hr, second_group_hr);
-      auto goodness_value = first_group_area + second_group_area + group_overlap;
-
-      if (goodness_value < min_goodness_value) {
-        min_goodness_value = goodness_value;
-        best_axis_idx = i;
-      }
-    }
-
-    std::sort(entries.begin(), entries.end(),
-    [i](const SpatialObject*& lhs, const SpatialObject*& rhs) {
-      return lhs->box[i].end() < rhs->box[i].end();
-    });
-
-    for (size_t j = 1; j <= k; ++j) {
-      for (size_t f1 = 0; f1 < m - 1 + j; ++f1)
-        first_group_hr.adjust(entries[f1].box);
-
-      for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2)
-        second_group_hr.adjust(entries[f2].box);
+        second_group_hr.adjust(entries[f2]->box);
 
       first_group_area = first_group_hr.getArea();
       second_group_area = second_group_hr.getArea();
@@ -106,6 +84,35 @@ size_t XNODE::chooseSplitAxis() {
         best_axis_idx = i;
       }
     }
+
+    first_group_hr.reset();
+    second_group_hr.reset();
+
+    std::sort(entries.begin(), entries.end(),
+    [&](const SpatialObject*& lhs, const SpatialObject*& rhs) {
+      return lhs->box[i].end() < rhs->box[i].end();
+    });
+
+    for (size_t j = 1; j <= k; ++j) {
+      for (size_t f1 = 0; f1 < m - 1 + j; ++f1)
+        first_group_hr.adjust(entries[f1]->box);
+
+      for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2)
+        second_group_hr.adjust(entries[f2]->box);
+
+      first_group_area = first_group_hr.getArea();
+      second_group_area = second_group_hr.getArea();
+      group_overlap = overlap(first_group_hr, second_group_hr);
+      goodness_value = first_group_area + second_group_area + group_overlap;
+
+      if (goodness_value < min_goodness_value) {
+        min_goodness_value = goodness_value;
+        best_axis_idx = i;
+      }
+    }
+
+    first_group_hr.reset();
+    second_group_hr.reset();
   }
 
   return best_axis_idx;
@@ -117,6 +124,8 @@ std::shared_ptr<typename XNODE> XNODE::insert(const SpatialObject& new_entry) {
     entries[size++] = new_entry;
     return nullptr;
   }
+
+  auto split_axis = chooseSplitAxis(new_entry);
 
   std::vector<SpatialObject> entries(M + 1);
   std::copy(begin(), end(), entries.begin());
