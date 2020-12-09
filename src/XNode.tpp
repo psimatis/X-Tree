@@ -1,52 +1,44 @@
 #pragma once
 
-template <size_t N, typename ElemType, size_t M, size_t m>
-XTree<N, ElemType, M, m>::XNode::XNode() : size(0) {
+template <size_t N, typename ElemType, size_t M, size_t m> XNODE::XNode() :
+  size(0) {
   this->entries.resize(M);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::XNode::iterator
-XTree<N, ElemType, M, m>::XNode::begin() {
+typename XNODE::iterator XNODE::begin() {
   return entries.begin();
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::XNode::iterator
-XTree<N, ElemType, M, m>::XNode::end() {
+typename XNODE::iterator XNODE::end() {
   return entries.begin() + size;
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::XNode::const_iterator
-XTree<N, ElemType, M, m>::XNode::begin()
-const {
+typename XNODE::const_iterator XNODE::begin() const {
   return entries.begin();
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::XNode::const_iterator
-XTree<N, ElemType, M, m>::XNode::end()
-const {
+typename XNODE::const_iterator XNODE::end() const {
   return entries.begin() + size;
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::SpatialObject&
-XTree<N, ElemType, M, m>::XNode::operator[](
+typename XTree<N, ElemType, M, m>::SpatialObject& XNODE::operator[](
   size_t index) {
   return entries.at(index);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-typename XTree<N, ElemType, M, m>::SpatialObject
-XTree<N, ElemType, M, m>::XNode::operator[](
-  size_t index) const {
+typename XTree<N, ElemType, M, m>::SpatialObject XNODE::operator[](size_t index)
+const {
   return entries.at(index);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-bool XTree<N, ElemType, M, m>::XNode::isLeaf() {
+bool XNODE::isLeaf() {
   if (!entries.empty() && entries.at(0).child_pointer != nullptr)
     return false;
 
@@ -54,9 +46,73 @@ bool XTree<N, ElemType, M, m>::XNode::isLeaf() {
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<typename XTree<N, ElemType, M, m>::XNode>
-XTree<N, ElemType, M, m>::XNode::insert(
-  const SpatialObject& new_entry) {
+size_t XNODE::chooseSplitAxis() {
+  std::vector<SpatialObject*> entries(this->size);
+
+  for (size_t i = 0; i < this->size; ++i)
+    entries[i] = &(*this)[i];
+
+  size_t k = M - 2*m + 2;
+  Hyperrectangle<N> first_group_hr, second_group_hr;
+  size_t best_axis_idx;
+  float min_goodness_value = FLT_MAX;
+
+  float first_group_area, second_group_area, group_overlap;
+  float goodness_value;
+
+  for (size_t i = 0; i < N; ++i) {
+    std::sort(entries.begin(), entries.end(),
+    [i](const SpatialObject*& lhs, const SpatialObject*& rhs) {
+      return lhs->box[i].begin() < rhs->box[i].begin();
+    });
+
+    for (size_t j = 1; j <= k; ++j) {
+      for (size_t f1 = 0; f1 < m - 1 + j; ++f1)
+        first_group_hr.adjust(entries[f1].box);
+
+      for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2)
+        second_group_hr.adjust(entries[f2].box);
+
+      auto first_group_area = first_group_hr.getArea();
+      auto second_group_area = second_group_hr.getArea();
+      auto group_overlap = overlap(first_group_hr, second_group_hr);
+      auto goodness_value = first_group_area + second_group_area + group_overlap;
+
+      if (goodness_value < min_goodness_value) {
+        min_goodness_value = goodness_value;
+        best_axis_idx = i;
+      }
+    }
+
+    std::sort(entries.begin(), entries.end(),
+    [i](const SpatialObject*& lhs, const SpatialObject*& rhs) {
+      return lhs->box[i].end() < rhs->box[i].end();
+    });
+
+    for (size_t j = 1; j <= k; ++j) {
+      for (size_t f1 = 0; f1 < m - 1 + j; ++f1)
+        first_group_hr.adjust(entries[f1].box);
+
+      for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2)
+        second_group_hr.adjust(entries[f2].box);
+
+      first_group_area = first_group_hr.getArea();
+      second_group_area = second_group_hr.getArea();
+      group_overlap = overlap(first_group_hr, second_group_hr);
+      goodness_value = first_group_area + second_group_area + group_overlap;
+
+      if (goodness_value < min_goodness_value) {
+        min_goodness_value = goodness_value;
+        best_axis_idx = i;
+      }
+    }
+  }
+
+  return best_axis_idx;
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+std::shared_ptr<typename XNODE> XNODE::insert(const SpatialObject& new_entry) {
   if (size < M) {
     entries[size++] = new_entry;
     return nullptr;
@@ -83,12 +139,15 @@ XTree<N, ElemType, M, m>::XNode::insert(
   float area_increase_g1, area_increase_g2;
   Hyperrectangle<N> enlarged_mbb_g1, enlarged_mbb_g2;
   size_t idx;
+
   while (!entries.empty()) {
     if (size + entries.size() == m) {
       for (auto& e : entries) this->insert(e);
+
       entries.clear();
     } else if (new_node->entries.size() + entries.size() == m) {
       for (auto& e : entries) new_node->insert(e);
+
       entries.clear();
     } else {
       pickNext(entries, &idx, mbb_group1, mbb_group2);
@@ -122,8 +181,8 @@ XTree<N, ElemType, M, m>::XNode::insert(
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-void XTree<N, ElemType, M, m>::XNode::pickSeeds(
-  std::vector<SpatialObject>& entries, size_t* first, size_t* second) {
+void XNODE::pickSeeds(std::vector<SpatialObject>& entries, size_t* first,
+                      size_t* second) {
   float max_waste = 0.f, area;
   Hyperrectangle<N> enlargement_box;
 
@@ -144,11 +203,9 @@ void XTree<N, ElemType, M, m>::XNode::pickSeeds(
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-void XTree<N, ElemType, M, m>::XNode::pickNext(
-  std::vector<SpatialObject>& entries,
-  size_t* idx,
-  const Hyperrectangle<N>& mbb_group1,
-  const Hyperrectangle<N>& mbb_group2) {
+void XNODE::pickNext(std::vector<SpatialObject>& entries, size_t* idx,
+                     const Hyperrectangle<N>& mbb_group1,
+                     const Hyperrectangle<N>& mbb_group2) {
   float max_diff = -1.f;
   Hyperrectangle<N> enlarged_g1, enlarged_g2;
   float area_increase_g1, area_increase_g2, area_diff;

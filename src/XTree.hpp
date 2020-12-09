@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <float.h>
+#include <algorithm>
 
 #include "Hyperrectangle.hpp"
 
@@ -41,6 +42,7 @@ struct XTree {
                   const Hyperrectangle<N>& mbb_group2);
 
     std::shared_ptr<XNode> insert(const SpatialObject& new_entry);
+    size_t chooseSplitAxis();
 
     std::vector<SpatialObject> entries;
     size_t size;
@@ -82,6 +84,8 @@ struct XTree {
   size_t entry_count;
   std::vector<ElemType> query_result;
 };
+
+#define XNODE XTree<N, ElemType, M, m>::XNode
 
 #include "XNode.tpp"
 #include "XTree.tpp"

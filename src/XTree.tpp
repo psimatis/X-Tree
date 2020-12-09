@@ -1,8 +1,6 @@
 #pragma once
 #include <float.h>
 
-#define XNODE typename XTree<N, ElemType, M, m>::XNode
-
 template <size_t N, typename ElemType, size_t M, size_t m>
 XTree<N, ElemType, M, m>::XTree()
   : root(std::make_shared<XNode>()), entry_count(0) {}
@@ -41,28 +39,10 @@ void XTree<N, ElemType, M, m>::insert(const Hyperrectangle<N>& box,
   root = new_root;
 }
 
-template <size_t N>
-float overlap(const Hyperrectangle<N>& hr1, const Hyperrectangle<N>& hr2) {
-  float overlap = 1.f;
-
-  for (size_t i = 0; i < N; ++i) {
-    float length = 0.f;
-
-    if (hr2.begin() < hr1.end() && hr1.begin() < hr2.end()
-        || hr1.begin() < hr2.end() && hr2.begin() < hr1.end())
-      length = std::min(hr1.end(), hr2.end())
-               - std::max(hr1.begin(), hr2.begin());
-
-    overlap *= length;
-  }
-
-  return overlap;
-}
-
 template <size_t N, typename ElemType, size_t M, size_t m>
 float getTotalOverlap(const Hyperrectangle<N>& box,
                       const size_t& idx,
-                      const std::shared_ptr<XNODE>& node) {
+                      const std::shared_ptr<typename XNODE>& node) {
   float total_overlap = 0.f;
 
   size_t i;
@@ -85,7 +65,7 @@ float getAreaEnlargement(const Hyperrectangle<N>& container,
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-size_t getMinOverlapHyperrectangle(std::shared_ptr<XNODE> node,
+size_t getMinOverlapHyperrectangle(std::shared_ptr<typename XNODE> node,
                                    const Hyperrectangle<N>& box) {
   auto entries = &node->entries;
   size_t idx;
@@ -113,7 +93,7 @@ size_t getMinOverlapHyperrectangle(std::shared_ptr<XNODE> node,
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<XNODE> XTree<N, ElemType, M, m>::chooseLeaf(
+std::shared_ptr<typename XNODE> XTree<N, ElemType, M, m>::chooseLeaf(
   const std::shared_ptr<XNode>& current_node,
   const Hyperrectangle<N>& box,
   const ElemType& value) {
@@ -131,7 +111,7 @@ std::shared_ptr<XNODE> XTree<N, ElemType, M, m>::chooseLeaf(
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<XNODE> XTree<N, ElemType, M, m>::chooseNode(
+std::shared_ptr<typename XNODE> XTree<N, ElemType, M, m>::chooseNode(
   const std::shared_ptr<XNode>& current_node,
   const Hyperrectangle<N>& box,
   SpatialObject*& entry) {
@@ -166,7 +146,7 @@ std::shared_ptr<XNODE> XTree<N, ElemType, M, m>::chooseNode(
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<XNODE> XTree<N, ElemType, M, m>::adjustTree(
+std::shared_ptr<typename XNODE> XTree<N, ElemType, M, m>::adjustTree(
   const std::shared_ptr<XNode>& parent,
   const std::shared_ptr<XNode>& left,
   const std::shared_ptr<XNode>& right,
