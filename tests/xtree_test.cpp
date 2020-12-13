@@ -40,9 +40,9 @@ TEST_F(XTreeTest, XNodeInsertTest) {
       << "The size of the xtree after inserting one element should equal 7.";
   EXPECT_EQ(xtree.root->size, size_t(2))
       << "The size of the xtree after the split should equal 7.";
-  EXPECT_EQ((*xtree.root)[0].child_pointer->size, size_t(4))
+  EXPECT_EQ((*xtree.root)[0].child_pointer->size, size_t(5))
       << "The size of the xtree's first child after the split should equal 3.";
-  EXPECT_EQ((*xtree.root)[1].child_pointer->size, size_t(3))
+  EXPECT_EQ((*xtree.root)[1].child_pointer->size, size_t(2))
       << "The size of the xtree's second child after the split should equal 4.";
 }
 

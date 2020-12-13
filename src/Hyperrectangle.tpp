@@ -47,6 +47,17 @@ float Hyperrectangle<N>::getArea() const {
 }
 
 template <size_t N>
+float Hyperrectangle<N>::getMargin() const {
+  float margin = 0.f;
+
+  for (const auto& interval : bounds)
+    margin += (interval.end() - interval.begin());
+  margin *= (1 << (N - 1));
+
+  return margin;
+}
+
+template <size_t N>
 void Hyperrectangle<N>::reset() {
   for (auto& interval : bounds)
     interval.reset();

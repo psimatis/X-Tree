@@ -6,7 +6,7 @@
 
 #include "Hyperrectangle.hpp"
 
-template <size_t N, typename ElemType, size_t M, size_t m = M / 2>
+template <size_t N, typename ElemType, size_t M, size_t m = size_t(M*0.4)>
 struct XTree {
   struct XNode;
 
@@ -43,6 +43,8 @@ struct XTree {
 
     std::shared_ptr<XNode> insert(const SpatialObject& new_entry);
     size_t chooseSplitAxis(const SpatialObject& new_entry);
+    std::shared_ptr<XNode> chooseSplitIndex(size_t axis,
+                                            const SpatialObject& new_entry);
 
     std::vector<SpatialObject> entries;
     size_t size;
