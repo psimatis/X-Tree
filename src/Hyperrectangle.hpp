@@ -10,7 +10,10 @@ struct Hyperrectangle {
   Interval& operator[](size_t index);
   Interval operator[](size_t index) const;
 
+  Hyperrectangle();
+  Hyperrectangle(const Hyperrectangle& other);
   Hyperrectangle& operator=(const Hyperrectangle& other);
+  ~Hyperrectangle();
 
   iterator begin();
   iterator end();
@@ -25,7 +28,6 @@ struct Hyperrectangle {
   void reset();
 
   void adjust(const Hyperrectangle& other);
-
 
  private:
   std::array<Interval, N> bounds;

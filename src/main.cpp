@@ -84,7 +84,7 @@ int main() {
   std::vector<Song> data;
   readFromFile(FILENAME, data);
 
-  XTree<14, SongHeader, 60> xtree;
+  XTree<14, SongHeader, 10> xtree;
 
   Hyperrectangle<14> point;
 
@@ -95,42 +95,4 @@ int main() {
     xtree.insert(point, data[i].getHeader());
     std::cout << "Inserted " << i << " regs.\n";
   }
-
-  // Hyperrectangle<4> h;
-//
-  // h[0] = Interval(45, 45);
-  // h[1] = Interval(1, 1);
-  // h[2] = Interval(12, 12);
-  // h[3] = Interval(17, 17);
-  // xtree.insert(h, 1);
-  // h[0] = Interval(9, 9);
-  // h[1] = Interval(43, 43);
-  // h[2] = Interval(35, 35);
-  // h[3] = Interval(38, 38);
-  // xtree.insert(h, 2);
-  // h[0] = Interval(31, 31);
-  // h[1] = Interval(9, 9);
-  // h[2] = Interval(10, 10);
-  // h[3] = Interval(47, 47);
-  // xtree.insert(h, 3);
-  // h[0] = Interval(27, 27);
-  // h[1] = Interval(11, 11);
-  // h[2] = Interval(25, 25);
-  // h[3] = Interval(28, 28);
-  // xtree.insert(h, 4);
-  // h[0] = Interval(12, 12);
-  // h[1] = Interval(5, 5);
-  // h[2] = Interval(23, 23);
-  // h[3] = Interval(19, 19);
-  // xtree.insert(h, 5);
-  // h[0] = Interval(42, 42);
-  // h[1] = Interval(15, 15);
-  // h[2] = Interval(26, 26);
-  // h[3] = Interval(7, 7);
-  // xtree.insert(h, 6);
-  // h[0] = Interval(30, 30);
-  // h[1] = Interval(31, 31);
-  // h[2] = Interval(17, 17);
-  // h[3] = Interval(44, 44);
-  // xtree.insert(h, 7);
 }
