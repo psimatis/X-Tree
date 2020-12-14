@@ -66,6 +66,6 @@ float Interval::getRange() const {
 }
 
 void Interval::reset() {
-  limits[0] = FLT_MAX;
-  limits[1] = -FLT_MAX;
+  begin() = FLT_MAX;
+  end() = -FLT_MAX;
 }
