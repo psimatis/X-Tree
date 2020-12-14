@@ -20,9 +20,12 @@ struct Hyperrectangle {
 
   float getArea() const;
 
+  float getMargin() const;
+
   void reset();
 
   void adjust(const Hyperrectangle& other);
+
 
  private:
   std::array<Interval, N> bounds;

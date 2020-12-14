@@ -1,10 +1,12 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <float.h>
+#include <algorithm>
 
 #include "Hyperrectangle.hpp"
 
-template <size_t N, typename ElemType, size_t M, size_t m = M / 2>
+template <size_t N, typename ElemType, size_t M, size_t m = size_t(M*0.4)>
 struct XTree {
   struct XNode;
 
@@ -15,10 +17,10 @@ struct XTree {
   };
 
   struct XNode {
-    typedef SpatialObject* iterator;
-    typedef const SpatialObject* const_iterator;
+    typedef typename std::vector<SpatialObject>::iterator iterator;
+    typedef typename std::vector<SpatialObject>::const_iterator const_iterator;
 
-    // XNode();
+    XNode();
     // XNode(const XNode& other);
     // XNode operator=(const XNode& other);
     // ~XNode();
@@ -40,8 +42,12 @@ struct XTree {
                   const Hyperrectangle<N>& mbb_group2);
 
     std::shared_ptr<XNode> insert(const SpatialObject& new_entry);
+    size_t chooseSplitAxis(const SpatialObject& new_entry);
+    std::shared_ptr<XNode> chooseSplitIndex(size_t axis,
+                                            const SpatialObject& new_entry);
 
     std::vector<SpatialObject> entries;
+    size_t size;
   };
 
   XTree();
@@ -51,8 +57,8 @@ struct XTree {
   size_t size() const;
   bool empty() const;
 
-  class Point;
-  std::shared_ptr<XNode> choose_subtree(const Point& point);
+  // class Point;
+  // std::shared_ptr<XNode> choose_subtree(const Point& point);
   // split();
   // topological_split();
   // choose_split_index();
@@ -74,12 +80,14 @@ struct XTree {
                                     const std::shared_ptr<XNode>& right,
                                     SpatialObject* entry);
 
-  std::vector<ElemType>& kNN(const Point& point);
+  // std::vector<ElemType>& kNN(const Point& point);
 
   std::shared_ptr<XNode> root;
   size_t entry_count;
   std::vector<ElemType> query_result;
 };
+
+#define XNODE XTree<N, ElemType, M, m>::XNode
 
 #include "XNode.tpp"
 #include "XTree.tpp"
