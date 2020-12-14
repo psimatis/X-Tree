@@ -11,8 +11,21 @@ Interval Hyperrectangle<N>::operator[](size_t index) const {
 }
 
 template <size_t N>
-Hyperrectangle<N>& Hyperrectangle<N>::operator=(const Hyperrectangle& other) {
+Hyperrectangle<N>::Hyperrectangle() {}
+
+template <size_t N>
+Hyperrectangle<N>::Hyperrectangle(const Hyperrectangle<N>& other) {
   std::copy(other.begin(), other.end(), begin());
+}
+
+template <size_t N> Hyperrectangle<N>::~Hyperrectangle() {}
+
+template <size_t N>
+Hyperrectangle<N>& Hyperrectangle<N>::operator=(
+                                  const Hyperrectangle<N>& other) {
+  if (this != &other)
+    std::copy(other.begin(), other.end(), begin());
+
   return *this;
 }
 
@@ -52,6 +65,7 @@ float Hyperrectangle<N>::getMargin() const {
 
   for (const auto& interval : bounds)
     margin += (interval.end() - interval.begin());
+
   margin *= (1 << (N - 1));
 
   return margin;
@@ -77,6 +91,7 @@ float overlap(const Hyperrectangle<N>& hr1, const Hyperrectangle<N>& hr2) {
 
   for (size_t i = 0; i < N; ++i) {
     float length = 0.f;
+
     if ((hr2.begin() < hr1.end() && hr1.begin() < hr2.end())
         || (hr1.begin() < hr2.end() && hr2.begin() < hr1.end()))
       length = std::min(hr1.end(), hr2.end())
