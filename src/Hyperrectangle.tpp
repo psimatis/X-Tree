@@ -92,10 +92,10 @@ float overlap(const Hyperrectangle<N>& hr1, const Hyperrectangle<N>& hr2) {
   for (size_t i = 0; i < N; ++i) {
     float length = 0.f;
 
-    if ((hr2.begin() < hr1.end() && hr1.begin() < hr2.end())
-        || (hr1.begin() < hr2.end() && hr2.begin() < hr1.end()))
-      length = std::min(hr1.end(), hr2.end())
-               - std::max(hr1.begin(), hr2.begin());
+    if ((hr2[i].begin() < hr1[i].end() && hr1[i].begin() < hr2[i].end())
+        || (hr1[i].begin() < hr2[i].end() && hr2[i].begin() < hr1[i].end()))
+      length = std::min(hr1[i].end(), hr2[i].end())
+               - std::max(hr1[i].begin(), hr2[i].begin());
 
     overlap *= length;
   }
