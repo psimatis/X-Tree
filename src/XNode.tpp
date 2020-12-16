@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 template <size_t N, typename ElemType, size_t M, size_t m> XNODE::XNode() :
   size(0) {
@@ -61,7 +62,7 @@ size_t XNODE::chooseSplitAxis(const SpatialObject& new_entry) {
 
   for (size_t i = 0; i < N; ++i) {
     std::sort(entries.begin(), entries.end(),
-    [&](const SpatialObject*& lhs, const SpatialObject*& rhs) {
+    [&i](const SpatialObject*& lhs, const SpatialObject*& rhs) {
       return lhs->box[i].begin() < rhs->box[i].begin();
     });
 
@@ -105,7 +106,6 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
   size_t k = M - 2*m + 2;
   Hyperrectangle<N> first_group_hr, second_group_hr;
 
-  float first_group_area, second_group_area;
   float group_overlap, total_area;
   float min_overlap, min_total_area;
   min_overlap = min_total_area = FLT_MAX;
@@ -123,14 +123,13 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
     for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2)
       second_group_hr.adjust(entries[f2]->box);
 
-    first_group_area = first_group_hr.getArea();
-    second_group_area = second_group_hr.getArea();
-    total_area = first_group_area + second_group_area;
+    total_area = first_group_hr.getArea() + second_group_hr.getArea();
     group_overlap = overlap(first_group_hr, second_group_hr);
 
     if (group_overlap < min_overlap ||
         (group_overlap == min_overlap && total_area < min_total_area)) {
-      best_distribution = entries;
+      min_overlap = group_overlap;
+      min_total_area = total_area;
       second_group_idx = m - 1 + j;
     }
 
@@ -138,10 +137,24 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
     second_group_hr.reset();
   }
 
+  for (size_t i = 0; i < second_group_idx; ++i)
+    first_group_hr.adjust(entries[i]->box);
+
+  for (size_t i = second_group_idx; i < M + 1; ++i)
+    second_group_hr.adjust(entries[i]->box);
+
+  total_area = first_group_hr.getArea() + second_group_hr.getArea();
+  auto ovlp = overlap(first_group_hr, second_group_hr);
+  auto relative_ovlp = ovlp / (total_area - ovlp);
+  std::cout << "Overlap: " << ovlp << "\n";
+
+  if (relative_ovlp > MAX_OVERLAP)
+    return nullptr;
+
   std::vector<SpatialObject> new_entry_order;
 
   for (size_t i = 0; i < M + 1; ++i)
-    new_entry_order.push_back(*(best_distribution[i]));
+    new_entry_order.push_back(*(entries[i]));
 
   this->size = second_group_idx;
 
@@ -155,12 +168,36 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
+std::shared_ptr<typename XNODE> XNODE::topological_split(
+    const SpatialObject& new_entry) {
+  auto split_axis = chooseSplitAxis(new_entry);
+  auto new_node = chooseSplitIndex(split_axis, new_entry);
+  return new_node;
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
 std::shared_ptr<typename XNODE> XNODE::insert(const SpatialObject& new_entry) {
   if (size < M) {
     entries[size++] = new_entry;
     return nullptr;
   }
 
-  auto split_axis = chooseSplitAxis(new_entry);
-  return chooseSplitIndex(split_axis, new_entry);
+  auto new_node = topological_split(new_entry);
+  if (new_node != nullptr)
+    return new_node;
+
+  new_node = overlap_minimal_split(new_entry); // TODO: Implement this case
+  if (new_node != nullptr)
+    return new_node;
+
+  // Create Supernode
+  entries.resize(entries.size() + M);
+  entries[size++] = new_entry;
+  return nullptr;
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+std::shared_ptr<typename XNODE> XNODE::overlap_minimal_split(
+    const SpatialObject& new_entry) {
+  return nullptr;
 }

@@ -6,6 +6,8 @@
 
 #include "Hyperrectangle.hpp"
 
+#define MAX_OVERLAP 0.2f
+
 template <size_t N, typename ElemType, size_t M, size_t m = size_t(M*0.4)>
 struct XTree {
   struct XNode;
@@ -21,9 +23,6 @@ struct XTree {
     typedef typename std::vector<SpatialObject>::const_iterator const_iterator;
 
     XNode();
-    // XNode(const XNode& other);
-    // XNode operator=(const XNode& other);
-    // ~XNode();
 
     iterator begin();
     iterator end();
@@ -42,9 +41,11 @@ struct XTree {
                   const Hyperrectangle<N>& mbb_group2);
 
     std::shared_ptr<XNode> insert(const SpatialObject& new_entry);
+    std::shared_ptr<XNode> topological_split(const SpatialObject& new_entry);
     size_t chooseSplitAxis(const SpatialObject& new_entry);
     std::shared_ptr<XNode> chooseSplitIndex(size_t axis,
                                             const SpatialObject& new_entry);
+    std::shared_ptr<XNode> overlap_minimal_split(const SpatialObject& new_entry);
 
     std::vector<SpatialObject> entries;
     size_t size;
@@ -57,12 +58,8 @@ struct XTree {
   size_t size() const;
   bool empty() const;
 
-  // class Point;
-  // std::shared_ptr<XNode> choose_subtree(const Point& point);
   // split();
   // topological_split();
-  // choose_split_index();
-  // choose_split_axis();
   // overlap_minimal_split();
   // create_supernode();
 
