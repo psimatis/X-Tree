@@ -93,6 +93,6 @@ int main() {
       point[j] = Interval(data[i].attributes[j], data[i].attributes[j]);
 
     xtree.insert(point, data[i].getHeader());
-    std::cout << "Inserted " << i << " regs.\n";
+    std::cout << "Inserted " << i + 1 << " regs." << std::endl;
   }
 }

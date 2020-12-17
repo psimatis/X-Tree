@@ -3,6 +3,7 @@
 #include <vector>
 #include <float.h>
 #include <algorithm>
+#include <stack>
 
 #include "Hyperrectangle.hpp"
 
@@ -16,6 +17,25 @@ struct XTree {
     Hyperrectangle<N> box;
     ElemType identifier;
     std::shared_ptr<XNode> child_pointer;
+  };
+
+  struct SplitHistory {
+    struct SHNode {
+      SHNode(size_t dim);
+
+      size_t dim;
+      std::shared_ptr<XNode> related_xnode;
+      std::shared_ptr<SHNode> nodes[2];
+    };
+
+    SplitHistory();
+    bool find(std::shared_ptr<SHNode> current_node,
+              std::shared_ptr<XNode> target_node, std::stack<SHNode*>& path);
+    void insert(size_t dim, std::shared_ptr<XNode> left,
+                std::shared_ptr<XNode> right);
+    bool getCommonSplitAxis();
+
+    std::shared_ptr<SHNode> root;
   };
 
   struct XNode {
@@ -40,15 +60,19 @@ struct XTree {
                   const Hyperrectangle<N>& mbb_group1,
                   const Hyperrectangle<N>& mbb_group2);
 
-    std::shared_ptr<XNode> insert(const SpatialObject& new_entry);
-    std::shared_ptr<XNode> topological_split(const SpatialObject& new_entry);
+    std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> insert(
+          const SpatialObject& new_entry);
+    std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> topological_split(
+          const SpatialObject& new_entry);
     size_t chooseSplitAxis(const SpatialObject& new_entry);
     std::shared_ptr<XNode> chooseSplitIndex(size_t axis,
                                             const SpatialObject& new_entry);
-    std::shared_ptr<XNode> overlap_minimal_split(const SpatialObject& new_entry);
+    std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> overlap_minimal_split(
+          const SpatialObject& new_entry);
 
     std::vector<SpatialObject> entries;
     size_t size;
+    SplitHistory split_history;
   };
 
   XTree();
@@ -64,18 +88,20 @@ struct XTree {
   // create_supernode();
 
   void insert(const Hyperrectangle<N>& box, const ElemType& value);
-  std::shared_ptr<XNode> chooseLeaf(const std::shared_ptr<XNode>& current_node,
-                                    const Hyperrectangle<N>& box,
-                                    const ElemType& value);
+  std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> chooseLeaf(
+        const std::shared_ptr<XNode>& current_node,
+        const Hyperrectangle<N>& box,
+        const ElemType& value);
 
   std::shared_ptr<XNode> chooseNode(const std::shared_ptr<XNode>& current_node,
                                     const Hyperrectangle<N>& box,
                                     SpatialObject*& entry);
 
-  std::shared_ptr<XNode> adjustTree(const std::shared_ptr<XNode>& current_node,
-                                    const std::shared_ptr<XNode>& left,
-                                    const std::shared_ptr<XNode>& right,
-                                    SpatialObject* entry);
+  std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> adjustTree(
+        const std::shared_ptr<XNode>& current_node,
+        const std::shared_ptr<XNode>& left,
+        const std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>>& right,
+        SpatialObject* entry);
 
   // std::vector<ElemType>& kNN(const Point& point);
 
@@ -85,6 +111,8 @@ struct XTree {
 };
 
 #define XNODE XTree<N, ElemType, M, m>::XNode
+#define SH XTree<N, ElemType, M, m>::SplitHistory
 
 #include "XNode.tpp"
+#include "SplitHistory.tpp"
 #include "XTree.tpp"

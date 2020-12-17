@@ -168,27 +168,34 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<typename XNODE> XNODE::topological_split(
-    const SpatialObject& new_entry) {
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
+    XNODE::topological_split(
+const SpatialObject& new_entry) {
   auto split_axis = chooseSplitAxis(new_entry);
   auto new_node = chooseSplitIndex(split_axis, new_entry);
-  return new_node;
+
+  return std::make_shared<std::pair<std::shared_ptr<typename XNODE>, size_t>>
+         (new_node, split_axis);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<typename XNODE> XNODE::insert(const SpatialObject& new_entry) {
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
+XNODE::insert(const SpatialObject& new_entry) {
   if (size < M) {
     entries[size++] = new_entry;
     return nullptr;
   }
 
-  auto new_node = topological_split(new_entry);
-  if (new_node != nullptr)
-    return new_node;
+  auto new_node_and_axis = topological_split(new_entry);
 
-  new_node = overlap_minimal_split(new_entry); // TODO: Implement this case
-  if (new_node != nullptr)
-    return new_node;
+  if (new_node_and_axis->first != nullptr)
+    return new_node_and_axis;
+
+  new_node_and_axis = overlap_minimal_split(
+                        new_entry); // TODO: Implement this case
+
+  if (new_node_and_axis->first != nullptr)
+    return new_node_and_axis;
 
   // Create Supernode
   entries.resize(entries.size() + M);
@@ -197,7 +204,8 @@ std::shared_ptr<typename XNODE> XNODE::insert(const SpatialObject& new_entry) {
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<typename XNODE> XNODE::overlap_minimal_split(
-    const SpatialObject& new_entry) {
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
+    XNODE::overlap_minimal_split(
+const SpatialObject& new_entry) {
   return nullptr;
 }
