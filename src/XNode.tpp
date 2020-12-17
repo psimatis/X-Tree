@@ -96,7 +96,6 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
     const SpatialObject& new_entry) {
   std::vector<const SpatialObject*> entries(this->size + 1);
   std::vector<const SpatialObject*> best_distribution;
-  auto new_node = std::make_shared<XNode>();
 
   for (size_t i = 0; i < M; ++i)
     entries[i] = &(*this)[i];
@@ -146,7 +145,7 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
   total_area = first_group_hr.getArea() + second_group_hr.getArea();
   auto ovlp = overlap(first_group_hr, second_group_hr);
   auto relative_ovlp = ovlp / (total_area - ovlp);
-  std::cout << "Overlap: " << ovlp << "\n";
+  // std::cout << "Overlap: " << ovlp << "\n";
 
   if (relative_ovlp > MAX_OVERLAP)
     return nullptr;
@@ -161,7 +160,9 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
   for (size_t i = 0; i < second_group_idx; ++i)
     this->entries[i] = new_entry_order[i];
 
-  for (size_t i = second_group_idx; i < M + 1; ++i)
+  auto new_node = std::make_shared<XNode>();
+
+  for (size_t i = second_group_idx; i < entries.size(); ++i)
     new_node->insert(new_entry_order[i]);
 
   return new_node;
@@ -174,27 +175,30 @@ const SpatialObject& new_entry) {
   auto split_axis = chooseSplitAxis(new_entry);
   auto new_node = chooseSplitIndex(split_axis, new_entry);
 
-  return std::make_shared<std::pair<std::shared_ptr<typename XNODE>, size_t>>
+  if (!new_node)
+    return nullptr;
+
+  return std::make_shared<std::pair<std::shared_ptr<XNode>, size_t>>
          (new_node, split_axis);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
-XNODE::insert(const SpatialObject& new_entry) {
-  if (size < M) {
+    XNODE::insert(
+const SpatialObject& new_entry) {
+  if (size < entries.size()) {
     entries[size++] = new_entry;
     return nullptr;
   }
 
   auto new_node_and_axis = topological_split(new_entry);
 
-  if (new_node_and_axis->first != nullptr)
+  if (new_node_and_axis != nullptr)
     return new_node_and_axis;
 
-  new_node_and_axis = overlap_minimal_split(
-                        new_entry); // TODO: Implement this case
+  new_node_and_axis = overlap_minimal_split(new_entry);
 
-  if (new_node_and_axis->first != nullptr)
+  if (new_node_and_axis != nullptr)
     return new_node_and_axis;
 
   // Create Supernode
@@ -207,5 +211,44 @@ template <size_t N, typename ElemType, size_t M, size_t m>
 std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
     XNODE::overlap_minimal_split(
 const SpatialObject& new_entry) {
-  return nullptr;
+  size_t split_axis = split_history.getCommonSplitAxis();
+
+  auto new_entries = entries;
+  new_entries.push_back(new_entry);
+
+  std::sort(new_entries.begin(), new_entries.begin() + size,
+  [&split_axis](const SpatialObject& lhs, const SpatialObject& rhs) {
+    return lhs.box[split_axis].begin() < rhs.box[split_axis].begin();
+  });
+
+  size_t second_group_idx = 0;
+
+  for (size_t i = 0; new_entries.size()/2 - i > m
+       &&  new_entries.size()/2 + 1 + i < new_entries.size() - m; ++i) {
+    if (new_entries[new_entries.size()/2 + i].box[split_axis].begin() <
+        new_entries[new_entries.size()/2 + 1 + i].box[split_axis].begin()) {
+      second_group_idx = new_entries.size()/2 + 1 + i + 1;
+      break;
+    }
+
+    if (new_entries[new_entries.size()/2 - i].box[split_axis].begin() <
+        new_entries[new_entries.size()/2 + 1 - i].box[split_axis].begin()) {
+      second_group_idx = new_entries.size()/2 + 1 - i + 1;
+      break;
+    }
+  }
+
+  if (!second_group_idx)
+    return nullptr;
+
+  for (size_t i = 0; i < second_group_idx; ++i)
+    this->entries[i] = new_entries[i];
+
+  auto new_node = std::make_shared<XNode>();
+
+  for (size_t i = second_group_idx; i < new_entries.size(); ++i)
+    new_node->insert(new_entries[i]);
+
+  return std::make_shared<std::pair<std::shared_ptr<XNode>, size_t>>(new_node,
+         split_axis);
 }
