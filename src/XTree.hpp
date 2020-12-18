@@ -4,6 +4,7 @@
 #include <float.h>
 #include <algorithm>
 #include <stack>
+#include <queue>
 
 #include "Hyperrectangle.hpp"
 
@@ -29,10 +30,13 @@ struct XTree {
     };
 
     SplitHistory();
+
     bool find(std::shared_ptr<SHNode> current_node,
               std::shared_ptr<XNode> target_node, std::stack<SHNode*>& path);
+
     void insert(size_t dim, std::shared_ptr<XNode> left,
                 std::shared_ptr<XNode> right);
+
     bool getCommonSplitAxis();
 
     std::shared_ptr<SHNode> root;
@@ -54,21 +58,27 @@ struct XTree {
     SpatialObject operator[](size_t index) const;
 
     bool isLeaf();
+
     void pickSeeds(std::vector<SpatialObject>& entries, size_t* first,
                    size_t* second);
+
     void pickNext(std::vector<SpatialObject>& entries, size_t* idx,
                   const Hyperrectangle<N>& mbb_group1,
                   const Hyperrectangle<N>& mbb_group2);
 
     std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> insert(
           const SpatialObject& new_entry);
+
     std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> topological_split(
           const SpatialObject& new_entry);
+
     size_t chooseSplitAxis(const SpatialObject& new_entry);
+
     std::shared_ptr<XNode> chooseSplitIndex(size_t axis,
                                             const SpatialObject& new_entry);
-    std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> overlap_minimal_split(
-          const SpatialObject& new_entry);
+
+    std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>>
+        overlap_minimal_split(const SpatialObject& new_entry);
 
     std::vector<SpatialObject> entries;
     size_t size;
@@ -82,12 +92,8 @@ struct XTree {
   size_t size() const;
   bool empty() const;
 
-  // split();
-  // topological_split();
-  // overlap_minimal_split();
-  // create_supernode();
-
   void insert(const Hyperrectangle<N>& box, const ElemType& value);
+
   std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> chooseLeaf(
         const std::shared_ptr<XNode>& current_node,
         const Hyperrectangle<N>& box,
@@ -103,11 +109,17 @@ struct XTree {
         const std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>>& right,
         SpatialObject* entry);
 
-  // std::vector<ElemType>& kNN(const Point& point);
+  void kNNProcess(const std::shared_ptr<XNode> current_node,
+                  const Hyperrectangle<N>& point,
+                  size_t k);
+
+  std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>& kNN(const Hyperrectangle<N>& point,
+                                      size_t k);
 
   std::shared_ptr<XNode> root;
   size_t entry_count;
-  std::vector<ElemType> query_result;
+  std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>> query_result;
+  float last_min_dist;
 };
 
 #define XNODE XTree<N, ElemType, M, m>::XNode

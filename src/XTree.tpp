@@ -174,3 +174,149 @@ SpatialObject* entry) {
   new_entry.child_pointer = right->first;
   return parent->insert(new_entry);
 }
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>& XTree<N, ElemType, M, m>::kNN(
+const Hyperrectangle<N>& point, size_t k) {
+  query_result.clear();
+  kNNProcess(root, point, k);
+  return query_result;
+}
+
+template <size_t N>
+float objectDist(const Hyperrectangle<N>& point, const Hyperrectangle<N>& obj);
+template <size_t N>
+float minDist(const Hyperrectangle<N>& lhs, const Hyperrectangle<N>& rhs);
+template <size_t N>
+float minMaxDist(const Hyperrectangle<N>& lhs, const Hyperrectangle<N>& rhs);
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode>
+    current_node,
+    const Hyperrectangle<N>& point, size_t k) {
+  float dist, min_dist, min_max_dist;
+  size_t last;
+
+  if (current_node->isLeaf()) {
+    for (const auto& entry : current_node->entries) {
+      dist = objectDist(point, entry.box);
+
+      if (query_result.size() < k)
+        query_result.push_back(std::make_pair(&entry.box, &entry.identifier));
+      else if (dist < last_min_dist) {
+        query_result[k - 1] = std::make_pair(&entry.box, &entry.identifier);
+        last_min_dist = dist;
+      }
+    }
+  }
+  else {
+    std::vector<std::tuple<std::shared_ptr<XNode>, float, float>> branchList;
+
+    for (size_t i = 0; i < current_node->size; ++i) {
+      auto entry = current_node->entries[i];
+      min_dist = minDist(point, entry.box);
+      min_max_dist = minMaxDist(point, entry.box);
+
+      // Tuple <Node, minDist, minMaxDist>
+      branchList.push_back(std::make_tuple(entry.child_pointer, min_dist,
+                                           min_max_dist));
+    }
+
+    std::sort(branchList.begin(), branchList.end(),
+              [](const std::tuple<std::shared_ptr<XNode>, float, float>& lhs,
+    const std::tuple<std::shared_ptr<XNode>, float, float>& rhs) {
+      return std::get<1>(lhs) < std::get<1>(rhs);
+    });
+
+    last = branchList.size();
+
+    // Discard MBRs. Strategy 1
+    for (size_t i = 0; i < branchList.size(); ++i) {
+      for (size_t j = 0; j < branchList.size(); ++j) {
+        if (i == j) continue;
+
+        if (std::get<2>(branchList[i]) < std::get<1>(branchList[j])) {
+          branchList.erase(branchList.begin() + j);
+          --last;
+        }
+      }
+    }
+
+    for (size_t i = 0; i < branchList.size(); ++i) {
+      auto next_node = std::get<0>(branchList[i]);
+      kNNProcess(next_node, point, k);
+
+      // for (size_t j = 0; j < branchList.size(); ++j) {
+        // if (std::get<1>(branchList[j]) > last_min_dist)
+          // branchList.erase(branchList.begin() + j);
+      // }
+    }
+  }
+}
+
+template <size_t N>
+float objectDist(const Hyperrectangle<N>& point, const Hyperrectangle<N>& obj) {
+  float obj_dist = 0;
+  float dim_dist;
+
+  for (size_t i = 0; i < N; ++i) {
+    dim_dist = point[i].begin() - obj[i].begin();
+    obj_dist += dim_dist*dim_dist;
+  }
+
+  return obj_dist;
+}
+
+template <size_t N>
+float minDist(const Hyperrectangle<N>& point, const Hyperrectangle<N>& hr) {
+  float dist = 0, r_i, dim_dist;
+
+  for (size_t i = 0; i < N; ++i) {
+    if (point[i].begin() < hr[i].begin())
+      r_i = hr[i].begin();
+    else if (point[i].begin() > hr[i].end())
+      r_i = hr[i].end();
+    else
+      r_i = point[i].begin();
+
+    dim_dist = point[i].begin() - r_i;
+    dist += dim_dist*dim_dist;
+  }
+
+  return dist;
+}
+
+template <size_t N>
+float minMaxDist(const Hyperrectangle<N>& point, const Hyperrectangle<N>& hr) {
+  float min_max_dist = FLT_MAX;
+  float dist = 0;
+  float rm_k, rM_i;
+  float tmp_dist;
+
+  for (size_t i = 0; i < N; ++i) {
+    if (point[i].begin() <= (hr[i].begin() + hr[i].end())/2)
+      rm_k = hr[i].begin();
+    else
+      rm_k = hr[i].end();
+
+    tmp_dist = point[i].begin() - rm_k;
+    dist = tmp_dist*tmp_dist;
+
+    for (size_t j = 0; j < N; ++j) {
+      if (i == j) continue;
+
+      if (point[i].begin() >= (hr[i].begin() + hr[i].end())/2)
+        rM_i = hr[i].begin();
+      else
+        rM_i = hr[i].end();
+
+      tmp_dist = point[i].begin() - rM_i;
+      dist += tmp_dist;
+    }
+
+    if (dist < min_max_dist)
+      min_max_dist = dist;
+  }
+
+  return min_max_dist;
+}
