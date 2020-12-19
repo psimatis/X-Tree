@@ -151,7 +151,21 @@ int k) {
   return G_DS.kNN(point, k);
 }
 
+void printBanner() {
+  std::cout << " __    __        __                                \n";
+  std::cout << "|  \\  |  \\      |  \\                               \n";
+  std::cout << "| ▓▓  | ▓▓     _| ▓▓_    ______   ______   ______  \n";
+  std::cout << " \\▓▓\\/  ▓▓    |   ▓▓ \\  /      \\ /      \\ /      \\ \n";
+  std::cout << "  >▓▓  ▓▓      \\▓▓▓▓▓▓ |  ▓▓▓▓▓▓\\  ▓▓▓▓▓▓\\  ▓▓▓▓▓▓\\ \t Copyright 2020\n";
+  std::cout << " /  ▓▓▓▓\\       | ▓▓ __| ▓▓   \\▓▓ ▓▓    ▓▓ ▓▓    ▓▓ \t Mateo Gonzales Navarrete\n";
+  std::cout << "|  ▓▓ \\▓▓\\      | ▓▓|  \\ ▓▓     | ▓▓▓▓▓▓▓▓ ▓▓▓▓▓▓▓▓ \t Github: mgonnav\n";
+  std::cout << "| ▓▓  | ▓▓       \\▓▓  ▓▓ ▓▓      \\▓▓     \\▓▓     \\ \t Website: www.mgonnav.com\n";
+  std::cout << " \\▓▓   \\▓▓        \\▓▓▓▓ \\▓▓       \\▓▓▓▓▓▓▓ \\▓▓▓▓▓▓▓\n" << std::endl;
+}
+
 int main() {
+  printBanner();
+
   readFromFile(FILENAME, data);
 
   Timer<int()> timed_built(build_data_structure, "Index");
@@ -160,8 +174,9 @@ int main() {
   Timer<std::vector<std::pair<const Hyperrectangle<14>*, const SongHeader*>>(std::vector<float>, int)>
       timed_query(
         query_knn, "Query KNN");
-  std::vector<float> query = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-  int k = 2;
+  // std::vector<float> query = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  std::vector<float> query = {0.531, 0.23, 0.632, 0.0405959, 0.41, 0, 1.16e-05, 0.181818, 0.341, -3.54163, 1, 0.47, 0.0236, 0.382568};
+  int k = 20;
   std::vector<std::pair<const Hyperrectangle<14>*, const SongHeader*>> result = timed_query(query, k);
 
   for (int i = 0; i < k; ++i) {
