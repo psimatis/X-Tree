@@ -54,7 +54,8 @@ float Hyperrectangle<N>::getArea() const {
   float area = 1.f;
 
   for (const auto& interval : bounds)
-    area *= (interval.end() - interval.begin());
+    if (interval.end() != interval.begin())
+      area *= (interval.end() - interval.begin());
 
   return area;
 }
@@ -67,7 +68,6 @@ float Hyperrectangle<N>::getMargin() const {
     margin += (interval.end() - interval.begin());
 
   margin *= (1 << (N - 1));
-
   return margin;
 }
 
@@ -93,9 +93,10 @@ float overlap(const Hyperrectangle<N>& hr1, const Hyperrectangle<N>& hr2) {
     float length = 0.f;
 
     if ((hr2[i].begin() < hr1[i].end() && hr1[i].begin() < hr2[i].end())
-        || (hr1[i].begin() < hr2[i].end() && hr2[i].begin() < hr1[i].end()))
+        || (hr1[i].begin() < hr2[i].end() && hr2[i].begin() < hr1[i].end())) {
       length = std::min(hr1[i].end(), hr2[i].end())
                - std::max(hr1[i].begin(), hr2[i].begin());
+    }
 
     overlap *= length;
   }
