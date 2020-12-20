@@ -1,12 +1,9 @@
 #pragma once
-#include <float.h>
 
-template <size_t N, typename ElemType, size_t M, size_t m>
-XTree<N, ElemType, M, m>::XTree()
+template <size_t N, typename ElemType, size_t M, size_t m> XTree<N, ElemType, M, m>::XTree()
   : root(std::make_shared<XNode>()), entry_count(0) {}
 
-template <size_t N, typename ElemType, size_t M, size_t m>
-XTree<N, ElemType, M, m>::~XTree() {}
+template <size_t N, typename ElemType, size_t M, size_t m> XTree<N, ElemType, M, m>::~XTree() {}
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 size_t XTree<N, ElemType, M, m>::dimension() const {
@@ -93,8 +90,7 @@ size_t getMinOverlapHyperrectangle(std::shared_ptr<typename XNODE> node,
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
-    XTree<N, ElemType, M, m>::chooseLeaf(
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>> XTree<N, ElemType, M, m>::chooseLeaf(
       const std::shared_ptr<XNode>& current_node,
       const Hyperrectangle<N>& box,
 const ElemType& value) {
@@ -149,8 +145,7 @@ std::shared_ptr<typename XNODE> XTree<N, ElemType, M, m>::chooseNode(
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
-    XTree<N, ElemType, M, m>::adjustTree(
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>> XTree<N, ElemType, M, m>::adjustTree(
       const std::shared_ptr<XNode>& parent,
       const std::shared_ptr<XNode>& left,
       const std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>>& right,
@@ -176,10 +171,22 @@ SpatialObject* entry) {
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>& XTree<N, ElemType, M, m>::kNN(
+std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>&
+    XTree<N, ElemType, M, m>::kNN(
 const Hyperrectangle<N>& point, size_t k) {
   query_result.clear();
+
+  for (size_t i = 0; i < k; ++i)
+    kNN_result.push(std::make_pair(nullptr, FLT_MAX));
+
   kNNProcess(root, point, k);
+
+  for (size_t i = 0; i < k; ++i) {
+    auto entry = kNN_result.top().first;
+    query_result.push_back(std::make_pair(&entry->box, &entry->identifier));
+    kNN_result.pop();
+  }
+
   return query_result;
 }
 
@@ -189,6 +196,17 @@ template <size_t N>
 float minDist(const Hyperrectangle<N>& lhs, const Hyperrectangle<N>& rhs);
 template <size_t N>
 float minMaxDist(const Hyperrectangle<N>& lhs, const Hyperrectangle<N>& rhs);
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+class kNN_comparison {
+ public:
+  bool operator() (const
+                   std::pair<const typename XTree<N, ElemType, M, m>::SpatialObject*, float>& lhs,
+                   const std::pair<const typename XTree<N, ElemType, M, m>::SpatialObject*, float>&
+                   rhs) {
+    return lhs.second < rhs.second;
+  }
+};
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode>
@@ -201,12 +219,17 @@ void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode>
     for (const auto& entry : current_node->entries) {
       dist = objectDist(point, entry.box);
 
-      if (query_result.size() < k)
-        query_result.push_back(std::make_pair(&entry.box, &entry.identifier));
-      else if (dist < last_min_dist) {
-        query_result[k - 1] = std::make_pair(&entry.box, &entry.identifier);
-        last_min_dist = dist;
+      if (kNN_result.top().second > dist) {
+        kNN_result.pop();
+        kNN_result.push(std::make_pair(&entry, dist));
       }
+
+      // if (query_result.size() < k)
+      // query_result.push_back(std::make_pair(&entry.box, &entry.identifier));
+      // else if (dist < last_min_dist) {
+      // query_result[k - 1] = std::make_pair(&entry.box, &entry.identifier);
+      // last_min_dist = dist;
+      // }
     }
   }
   else {
@@ -247,8 +270,8 @@ void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode>
       kNNProcess(next_node, point, k);
 
       // for (size_t j = 0; j < branchList.size(); ++j) {
-        // if (std::get<1>(branchList[j]) > last_min_dist)
-          // branchList.erase(branchList.begin() + j);
+      // if (std::get<1>(branchList[j]) > last_min_dist)
+      // branchList.erase(branchList.begin() + j);
       // }
     }
   }
@@ -311,7 +334,7 @@ float minMaxDist(const Hyperrectangle<N>& point, const Hyperrectangle<N>& hr) {
         rM_i = hr[i].end();
 
       tmp_dist = point[i].begin() - rM_i;
-      dist += tmp_dist;
+      dist += tmp_dist*tmp_dist;
     }
 
     if (dist < min_max_dist)

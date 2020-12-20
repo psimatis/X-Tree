@@ -10,6 +10,9 @@
 
 #define MAX_OVERLAP 0.2f
 
+template <size_t N, typename ElemType, size_t M, size_t m>
+class kNN_comparison;
+
 template <size_t N, typename ElemType, size_t M, size_t m = size_t(M*0.4)>
 struct XTree {
   struct XNode;
@@ -78,7 +81,8 @@ struct XTree {
                                             const SpatialObject& new_entry);
 
     std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>>
-        overlap_minimal_split(const SpatialObject& new_entry);
+        overlap_minimal_split(
+          const SpatialObject& new_entry);
 
     std::vector<SpatialObject> entries;
     size_t size;
@@ -113,12 +117,14 @@ struct XTree {
                   const Hyperrectangle<N>& point,
                   size_t k);
 
-  std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>& kNN(const Hyperrectangle<N>& point,
-                                      size_t k);
+  std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>& kNN(
+        const Hyperrectangle<N>& point,
+        size_t k);
 
   std::shared_ptr<XNode> root;
   size_t entry_count;
   std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>> query_result;
+  std::priority_queue<std::pair<const SpatialObject*, float>, std::vector<std::pair<const SpatialObject*, float>>, kNN_comparison<N, ElemType, M, m>> kNN_result;
   float last_min_dist;
 };
 

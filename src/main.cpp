@@ -12,7 +12,9 @@
 #include "Hyperrectangle.hpp"
 #include "XTree.hpp"
 
-#define FILENAME "../data/sample.csv"
+#define FILENAME "../data/data.csv"
+
+// float MAX_VALUES[14];
 
 struct SongHeader {
   std::string id;
@@ -34,7 +36,7 @@ struct Song {
 
   Hyperrectangle<14> attributes;
   // valence, acousticness, danceability;
-  // duration_ms, energy, xplicit;
+  // duration_ms, energy, explicit;
   // instrumentalness, key, liveness;
   // loudness, mode, popularity;
   // speechiness, tempo;
@@ -55,13 +57,20 @@ std::istream& operator>>(std::istream& is, Song& song) {
      >> song.attributes[13].begin();
 
   for (int i = 0; i < 14; ++i)
+  {
     song.attributes[i].end() = song.attributes[i].begin();
+    // if (MAX_VALUES[i] < song.attributes[i].begin())
+      // MAX_VALUES[i] = song.attributes[i].begin();
+  }
 
-  song.attributes[3].begin() = song.attributes[3].end() = song.attributes[3].begin() / 5.4035e+06;
-  song.attributes[7].begin() = song.attributes[7].end() = song.attributes[7].begin() / 11.f;
-  song.attributes[9].begin() = song.attributes[9].end() = song.attributes[9].begin() / 3.855f;
-  song.attributes[11].begin() = song.attributes[11].end() = song.attributes[11].begin() / 100.f;
-  song.attributes[13].begin() = song.attributes[13].end() = song.attributes[13].begin() / 243.507f;
+  // song.attributes[2].begin() = song.attributes[2].end() = song.attributes[2].begin() / 6.f;
+  // song.attributes[3].begin() = song.attributes[3].end() = song.attributes[3].begin() / 3.49977e+06;
+  // song.attributes[5].begin() = song.attributes[5].end() = song.attributes[5].begin() / 106.609f;
+  // song.attributes[6].begin() = song.attributes[6].end() = song.attributes[6].begin() / 1942.f;
+  // song.attributes[7].begin() = song.attributes[7].end() = song.attributes[7].begin() / 11.f;
+  // song.attributes[9].begin() = song.attributes[9].end() = song.attributes[9].begin() / 184442.f;
+  // song.attributes[11].begin() = song.attributes[11].end() = song.attributes[11].begin() / 76.f;
+  // song.attributes[13].begin() = song.attributes[13].end() = song.attributes[13].begin() / 221.741f;
 
   return is;
 }
@@ -130,7 +139,7 @@ class Timer<R(T...)> {
   std::string process_name_;
 };
 
-XTree<14, SongHeader, 10> G_DS;
+XTree<14, SongHeader, 5> G_DS;
 std::vector<Song> data;
 
 int build_data_structure() {
@@ -152,15 +161,13 @@ int k) {
 }
 
 void printBanner() {
-  std::cout << " __    __        __                                \n";
-  std::cout << "|  \\  |  \\      |  \\                               \n";
-  std::cout << "| ▓▓  | ▓▓     _| ▓▓_    ______   ______   ______  \n";
-  std::cout << " \\▓▓\\/  ▓▓    |   ▓▓ \\  /      \\ /      \\ /      \\ \n";
-  std::cout << "  >▓▓  ▓▓      \\▓▓▓▓▓▓ |  ▓▓▓▓▓▓\\  ▓▓▓▓▓▓\\  ▓▓▓▓▓▓\\ \t Copyright 2020\n";
-  std::cout << " /  ▓▓▓▓\\       | ▓▓ __| ▓▓   \\▓▓ ▓▓    ▓▓ ▓▓    ▓▓ \t Mateo Gonzales Navarrete\n";
-  std::cout << "|  ▓▓ \\▓▓\\      | ▓▓|  \\ ▓▓     | ▓▓▓▓▓▓▓▓ ▓▓▓▓▓▓▓▓ \t Github: mgonnav\n";
-  std::cout << "| ▓▓  | ▓▓       \\▓▓  ▓▓ ▓▓      \\▓▓     \\▓▓     \\ \t Website: www.mgonnav.com\n";
-  std::cout << " \\▓▓   \\▓▓        \\▓▓▓▓ \\▓▓       \\▓▓▓▓▓▓▓ \\▓▓▓▓▓▓▓\n" << std::endl;
+  std::cout << "\n";
+  std::cout << "\t██╗  ██╗  ████████╗██████╗ ███████╗███████╗\n";
+  std::cout << "\t╚██╗██╔╝  ╚══██╔══╝██╔══██╗██╔════╝██╔════╝\t Copyright 2020\n";
+  std::cout << "\t ╚███╔╝█████╗██║   ██████╔╝█████╗  █████╗  \t By Mateo Gonzales Navarrete\n";
+  std::cout << "\t ██╔██╗╚════╝██║   ██╔══██╗██╔══╝  ██╔══╝  \t Github: mgonnav\n";
+  std::cout << "\t██╔╝ ██╗     ██║   ██║  ██║███████╗███████╗\t Website: www.mgonnav.com\n";
+  std::cout << "\t╚═╝  ╚═╝     ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝\n" << std::endl;
 }
 
 int main() {
@@ -168,21 +175,44 @@ int main() {
 
   readFromFile(FILENAME, data);
 
+  std::cout << "[[ Indexing data... ]]\n";
   Timer<int()> timed_built(build_data_structure, "Index");
   timed_built();
+  std::cout << "\n";
+  
+  // for (int i = 0; i < 14; ++i)
+    // std::cout << "MAX_VALUE[" << i << "] = " << MAX_VALUES[i] << "\n";
 
   Timer<std::vector<std::pair<const Hyperrectangle<14>*, const SongHeader*>>(std::vector<float>, int)>
-      timed_query(
-        query_knn, "Query KNN");
-  // std::vector<float> query = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-  std::vector<float> query = {0.531, 0.23, 0.632, 0.0405959, 0.41, 0, 1.16e-05, 0.181818, 0.341, -3.54163, 1, 0.47, 0.0236, 0.382568};
-  int k = 20;
-  std::vector<std::pair<const Hyperrectangle<14>*, const SongHeader*>> result = timed_query(query, k);
+      timed_query(query_knn, "Query KNN");
 
-  for (int i = 0; i < k; ++i) {
-    std::cout << result[i].second->name << "\n";
-    for (int j = 0; j < 14; ++j)
-      std::cout << (*result[i].first)[j].begin() << " ";
-    std::cout << "\n";
+  std::vector<float> query(14);
+  int k;
+  std::vector<std::pair<const Hyperrectangle<14>*, const SongHeader*>> result;
+  std::string delim;
+  while (true) {
+    std::cout << "[[ Query KNN ]]\n";
+    std::cout << ">> Number of Nearest Neighbors: ";
+    std::cin >> k;
+    std::cout << ">> Insert query point values: ";
+    for (int i = 0; i < 14; ++i)
+      std::cin >> query[i];
+
+    result = timed_query(query, k);
+
+    std::cout << "---------------------------------------------------------------------------------------------\n";
+    for (int i = k - 1; i >= 0; --i) {
+      std::cout << "| #" << k - i << " " << result[i].second->name << "\n";
+      delim = "";
+      std::cout << "|\t{";
+      for (int j = 0; j < 14; ++j) {
+        std::cout << delim << (*result[i].first)[j].begin();
+        delim = ", ";
+      }
+      std::cout << "}\n";
+      std::cout << "---------------------------------------------------------------------------------------------\n";
+    }
+
+    std::cout << std::endl;
   }
 }
