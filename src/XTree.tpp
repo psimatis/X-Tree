@@ -1,9 +1,11 @@
 #pragma once
 
-template <size_t N, typename ElemType, size_t M, size_t m> XTree<N, ElemType, M, m>::XTree()
+template <size_t N, typename ElemType, size_t M, size_t m>
+XTree<N, ElemType, M, m>::XTree()
   : root(std::make_shared<XNode>()), entry_count(0) {}
 
-template <size_t N, typename ElemType, size_t M, size_t m> XTree<N, ElemType, M, m>::~XTree() {}
+template <size_t N, typename ElemType, size_t M, size_t m>
+XTree<N, ElemType, M, m>::~XTree() {}
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 size_t XTree<N, ElemType, M, m>::dimension() const {
@@ -41,7 +43,6 @@ float getTotalOverlap(const Hyperrectangle<N>& box,
                       const size_t& idx,
                       const std::shared_ptr<typename XNODE>& node) {
   float total_overlap = 0.f;
-
   size_t i;
 
   for (i = 0; i < idx; ++i)
@@ -90,10 +91,11 @@ size_t getMinOverlapHyperrectangle(std::shared_ptr<typename XNODE> node,
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>> XTree<N, ElemType, M, m>::chooseLeaf(
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
+    XTree<N, ElemType, M, m>::chooseLeaf(
       const std::shared_ptr<XNode>& current_node,
       const Hyperrectangle<N>& box,
-const ElemType& value) {
+      const ElemType& value) {
   if (!current_node->isLeaf()) {
     SpatialObject* entry;
     auto next_node = chooseNode(current_node, box, entry);
@@ -109,21 +111,18 @@ const ElemType& value) {
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 std::shared_ptr<typename XNODE> XTree<N, ElemType, M, m>::chooseNode(
-  const std::shared_ptr<XNode>& current_node,
-  const Hyperrectangle<N>& box,
-  SpatialObject*& entry) {
-
+    const std::shared_ptr<XNode>& current_node,
+    const Hyperrectangle<N>& box,
+    SpatialObject*& entry) {
   std::shared_ptr<XNode> node;
 
   if ((*current_node)[0].child_pointer->isLeaf()) {
     auto idx_least_overlap = getMinOverlapHyperrectangle<N, ElemType, M, m>
                              (current_node, box);
-
     auto& chosen_entry = (*current_node)[idx_least_overlap];
     node = chosen_entry.child_pointer;
     entry = &chosen_entry;
-  }
-  else {
+  } else {
     float min_area, min_enlargement;
     min_area = min_enlargement = FLT_MAX;
 
@@ -145,11 +144,12 @@ std::shared_ptr<typename XNODE> XTree<N, ElemType, M, m>::chooseNode(
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>> XTree<N, ElemType, M, m>::adjustTree(
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
+    XTree<N, ElemType, M, m>::adjustTree(
       const std::shared_ptr<XNode>& parent,
       const std::shared_ptr<XNode>& left,
       const std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>>& right,
-SpatialObject* entry) {
+      SpatialObject* entry) {
   entry->box.reset();
 
   for (SpatialObject current_entry : *left)
@@ -165,14 +165,12 @@ SpatialObject* entry) {
     new_entry.box.adjust(current_entry.box);
 
   parent->split_history.insert(right->second, left, right->first);
-
   new_entry.child_pointer = right->first;
   return parent->insert(new_entry);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>&
-    XTree<N, ElemType, M, m>::kNN(
+std::vector<std::pair<Hyperrectangle<14>, const ElemType*>>& XTree<N, ElemType, M, m>::kNN(
 const Hyperrectangle<N>& point, size_t k) {
   query_result.clear();
 
@@ -183,7 +181,7 @@ const Hyperrectangle<N>& point, size_t k) {
 
   for (size_t i = 0; i < k; ++i) {
     auto entry = kNN_result.top().first;
-    query_result.push_back(std::make_pair(&entry->box, &entry->identifier));
+    query_result.push_back(std::make_pair(entry->box, &entry->identifier));
     kNN_result.pop();
   }
 
@@ -200,17 +198,16 @@ float minMaxDist(const Hyperrectangle<N>& lhs, const Hyperrectangle<N>& rhs);
 template <size_t N, typename ElemType, size_t M, size_t m>
 class kNN_comparison {
  public:
-  bool operator() (const
-                   std::pair<const typename XTree<N, ElemType, M, m>::SpatialObject*, float>& lhs,
-                   const std::pair<const typename XTree<N, ElemType, M, m>::SpatialObject*, float>&
-                   rhs) {
+  bool operator()
+    (const std::pair<const typename XTree<N, ElemType, M, m>::SpatialObject*, float>& lhs,
+     const std::pair<const typename XTree<N, ElemType, M, m>::SpatialObject*, float>& rhs) {
     return lhs.second < rhs.second;
   }
 };
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode>
-    current_node,
+void XTree<N, ElemType, M, m>::kNNProcess(
+    const std::shared_ptr<XNode> current_node,
     const Hyperrectangle<N>& point, size_t k) {
   float dist, min_dist, min_max_dist;
   size_t last;
@@ -223,16 +220,8 @@ void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode>
         kNN_result.pop();
         kNN_result.push(std::make_pair(&entry, dist));
       }
-
-      // if (query_result.size() < k)
-      // query_result.push_back(std::make_pair(&entry.box, &entry.identifier));
-      // else if (dist < last_min_dist) {
-      // query_result[k - 1] = std::make_pair(&entry.box, &entry.identifier);
-      // last_min_dist = dist;
-      // }
     }
-  }
-  else {
+  } else {
     std::vector<std::tuple<std::shared_ptr<XNode>, float, float>> branchList;
 
     for (size_t i = 0; i < current_node->size; ++i) {
@@ -250,7 +239,6 @@ void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode>
     const std::tuple<std::shared_ptr<XNode>, float, float>& rhs) {
       return std::get<1>(lhs) < std::get<1>(rhs);
     });
-
     last = branchList.size();
 
     // Discard MBRs. Strategy 1
@@ -268,7 +256,6 @@ void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode>
     for (size_t i = 0; i < branchList.size(); ++i) {
       auto next_node = std::get<0>(branchList[i]);
       kNNProcess(next_node, point, k);
-
       // for (size_t j = 0; j < branchList.size(); ++j) {
       // if (std::get<1>(branchList[j]) > last_min_dist)
       // branchList.erase(branchList.begin() + j);

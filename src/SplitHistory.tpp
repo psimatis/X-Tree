@@ -26,7 +26,6 @@ bool SH::find(std::shared_ptr<SHNode> current_node,
   }
 
   path.pop();
-
   return 0;
 }
 
@@ -43,18 +42,15 @@ void SH::insert(size_t dim, std::shared_ptr<XNODE> left,
       return;
 
     new_dim_node = path.top();
-  }
-  else {
+  } else {
     root = std::make_shared<SHNode>(dim);
     new_dim_node = root.get();
   }
 
   new_dim_node->dim = dim;
   new_dim_node->related_xnode = nullptr;
-
   new_dim_node->nodes[0] = std::make_shared<SHNode>(-1);
   new_dim_node->nodes[0]->related_xnode = left;
-
   new_dim_node->nodes[1] = std::make_shared<SHNode>(-1);
   new_dim_node->nodes[1]->related_xnode = right;
 }
