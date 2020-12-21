@@ -115,18 +115,16 @@ struct XTree {
                   const Hyperrectangle<N>& point,
                   size_t k);
 
-  std::vector<std::pair<Hyperrectangle<14>, const ElemType*>>& kNN(
+  std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>& kNN(
         const Hyperrectangle<N>& point,
         size_t k);
 
   std::shared_ptr<XNode> root;
   size_t entry_count;
-  std::vector<std::pair<Hyperrectangle<14>, const ElemType*>> query_result;
+  std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>> query_result;
   std::priority_queue<std::pair<const SpatialObject*, float>,
                       std::vector<std::pair<const SpatialObject*,
                       float>>, kNN_comparison<N, ElemType, M, m>> kNN_result;
-  float last_min_dist;
-  static int xixi;
 };
 
 #define XNODE XTree<N, ElemType, M, m>::XNode

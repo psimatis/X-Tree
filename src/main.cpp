@@ -14,6 +14,8 @@
 
 #define FILENAME "../data/data.csv"
 
+const float NORMALIZE_VALUES[14] = {1, 1, 1, 3.49977e+06, 1, 1, 1, 11.f, 1, 63.85f, 1, 76, 1, 221.741f};
+
 struct SongHeader {
   std::string id;
   int year;
@@ -143,7 +145,7 @@ int build_data_structure() {
   return 0;
 }
 
-std::vector<std::pair<Hyperrectangle<14>, const SongHeader*>>& query_knn(
+std::vector<std::pair<const Hyperrectangle<14>*, const SongHeader*>>& query_knn(
       std::vector<float> query, int k) {
   Hyperrectangle<14> point;
 
@@ -165,12 +167,12 @@ void printBanner() {
 
 template <size_t N>
 float euclidean_dist(const std::vector<float>& p1,
-                     const Hyperrectangle<N>& p2) {
+                     const Hyperrectangle<N>*& p2) {
   float dist = 0;
   float tmp_dist;
 
   for (size_t i = 0; i < N; ++i) {
-    tmp_dist = p1[i] - p2[i].begin();
+    tmp_dist = p1[i] - (*p2)[i].begin();
     dist += tmp_dist*tmp_dist;
   }
 
@@ -186,15 +188,25 @@ void normalize_query(std::vector<float>& query) {
   query[13] /= 221.741f;
 }
 
-void denormalize_result(
-  std::vector<std::pair<Hyperrectangle<14>, const SongHeader*>>& result,
+void print_denormalized_result(
+  std::vector<std::pair<const Hyperrectangle<14>*, const SongHeader*>>& result,
   size_t idx) {
-  (result[idx].first)[3].begin()  *= 3.49977e+06;
-  (result[idx].first)[7].begin()  *= 11.f;
-  (result[idx].first)[9].begin()  *= 63.85f;
-  (result[idx].first)[9].begin()  -= 60.f;
-  (result[idx].first)[11].begin() *= 76.f;
-  (result[idx].first)[13].begin() *= 221.741f;
+
+  std::string delim;
+  std::cout << "|\tValues: {";
+  delim = "";
+  for (size_t j = 0; j < 9; ++j) {
+    std::cout << delim << ((*result[idx].first)[j].begin() * NORMALIZE_VALUES[j]);
+    delim = ", ";
+  }
+
+  std::cout << delim << ((*result[idx].first)[9].begin() * NORMALIZE_VALUES[9] - 60);
+
+  for (size_t j = 10; j < 14; ++j) {
+    std::cout << delim << ((*result[idx].first)[j].begin() * NORMALIZE_VALUES[j]);
+    delim = ", ";
+  }
+  std::cout << "}\n";
 }
 
 int main() {
@@ -207,12 +219,12 @@ int main() {
   timed_built();
   std::cout << "\n";
 
-  Timer<std::vector<std::pair<Hyperrectangle<14>, const SongHeader*>>&(std::vector<float>, int)>
+  Timer<std::vector<std::pair<const Hyperrectangle<14>*, const SongHeader*>>&(std::vector<float>, int)>
       timed_query(query_knn, "Query kNN");
 
   std::vector<float> query(14);
   int k;
-  std::vector<std::pair<Hyperrectangle<14>, const SongHeader*>> result;
+  std::vector<std::pair<const Hyperrectangle<14>*, const SongHeader*>> result;
   std::string delim;
 
   while (true) {
@@ -226,25 +238,16 @@ int main() {
 
     normalize_query(query);
     result = timed_query(query, k);
-    std::cout <<
-              "--------------------------------------------------------------------------------\n";
+    std::cout << "--------------------------------------------------------------------------------\n";
 
     for (int i = k - 1; i >= 0; --i) {
       std::cout << "| #" << k - i << " " << result[i].second->name << "\n";
       std::cout << "|\tDistance: " << euclidean_dist<14>(query,
                 result[i].first) << "\n";
-      denormalize_result(result, i);
-      delim = "";
-      std::cout << "|\tValues: {";
 
-      for (int j = 0; j < 14; ++j) {
-        std::cout << delim << (result[i].first)[j].begin();
-        delim = ", ";
-      }
+      print_denormalized_result(result, i);
 
-      std::cout << "}\n";
-      std::cout <<
-                "--------------------------------------------------------------------------------\n";
+      std::cout << "--------------------------------------------------------------------------------\n";
     }
 
     std::cout << std::endl;

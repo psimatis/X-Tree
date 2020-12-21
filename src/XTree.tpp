@@ -170,7 +170,7 @@ std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::vector<std::pair<Hyperrectangle<14>, const ElemType*>>& XTree<N, ElemType, M, m>::kNN(
+std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>& XTree<N, ElemType, M, m>::kNN(
 const Hyperrectangle<N>& point, size_t k) {
   query_result.clear();
 
@@ -181,7 +181,7 @@ const Hyperrectangle<N>& point, size_t k) {
 
   for (size_t i = 0; i < k; ++i) {
     auto entry = kNN_result.top().first;
-    query_result.push_back(std::make_pair(entry->box, &entry->identifier));
+    query_result.push_back(std::make_pair(&entry->box, &entry->identifier));
     kNN_result.pop();
   }
 
