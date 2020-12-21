@@ -12,15 +12,12 @@ at the root of the project.
 
 ```
 project_root
-├── d  cmake
-├── f  CMakeLists.googletest.txt.in
 ├── f  CMakeLists.txt
 ├── d  data
 │  └── f  data.csv        <-------- HERE
 ├── f  LICENSE
 ├── f  README.md
-├── d  src
-└── d  tests
+└── d  src
 ```
 
 # Compiling
@@ -35,7 +32,6 @@ the project:
 cmake -B build/ -S .
 cd build/
 make
-make test
 ./x_tree
 ```
 
