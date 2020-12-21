@@ -58,18 +58,14 @@ std::istream& operator>>(std::istream& is, Song& song) {
     song.attributes[i].end() = song.attributes[i].begin();
 
   // Normalize values
-  song.attributes[2].begin() = song.attributes[2].end() =
-                                 song.attributes[2].begin() / 6.f;
   song.attributes[3].begin() = song.attributes[3].end() =
                                  song.attributes[3].begin() / 3.49977e+06;
-  song.attributes[5].begin() = song.attributes[5].end() =
-                                 song.attributes[5].begin() / 106.609f;
-  song.attributes[6].begin() = song.attributes[6].end() =
-                                 song.attributes[6].begin() / 1942.f;
   song.attributes[7].begin() = song.attributes[7].end() =
                                  song.attributes[7].begin() / 11.f;
   song.attributes[9].begin() = song.attributes[9].end() =
-                                 song.attributes[9].begin() / 184442.f;
+                                 song.attributes[9].begin() + 60.f;
+  song.attributes[9].begin() = song.attributes[9].end() =
+                                 song.attributes[9].begin() / 63.85f;
   song.attributes[11].begin() = song.attributes[11].end() =
                                   song.attributes[11].begin() / 76.f;
   song.attributes[13].begin() = song.attributes[13].end() =
@@ -182,12 +178,10 @@ float euclidean_dist(const std::vector<float>& p1,
 }
 
 void normalize_query(std::vector<float>& query) {
-  query[2] /= 6.f;
   query[3] /= 3.49977e+06;
-  query[5] /= 106.609f;
-  query[6] /= 1942.f;
   query[7] /= 11.f;
-  query[9] /= 184442.f;
+  query[9] += 60.f;
+  query[9] /= 63.85f;
   query[11] /= 76.f;
   query[13] /= 221.741f;
 }
@@ -195,12 +189,10 @@ void normalize_query(std::vector<float>& query) {
 void denormalize_result(
   std::vector<std::pair<Hyperrectangle<14>, const SongHeader*>>& result,
   size_t idx) {
-  (result[idx].first)[2].begin()  *= 6.f;
   (result[idx].first)[3].begin()  *= 3.49977e+06;
-  (result[idx].first)[5].begin()  *= 106.609f;
-  (result[idx].first)[6].begin()  *= 1942.f;
   (result[idx].first)[7].begin()  *= 11.f;
-  (result[idx].first)[9].begin()  *= 184442.f;
+  (result[idx].first)[9].begin()  *= 63.85f;
+  (result[idx].first)[9].begin()  -= 60.f;
   (result[idx].first)[11].begin() *= 76.f;
   (result[idx].first)[13].begin() *= 221.741f;
 }

@@ -256,10 +256,10 @@ void XTree<N, ElemType, M, m>::kNNProcess(
     for (size_t i = 0; i < branchList.size(); ++i) {
       auto next_node = std::get<0>(branchList[i]);
       kNNProcess(next_node, point, k);
-      // for (size_t j = 0; j < branchList.size(); ++j) {
-      // if (std::get<1>(branchList[j]) > last_min_dist)
-      // branchList.erase(branchList.begin() + j);
-      // }
+      for (size_t j = 0; j < branchList.size(); ++j) {
+        if (std::get<1>(branchList[j]) > kNN_result.top().second)
+        branchList.erase(branchList.begin() + j);
+      }
     }
   }
 }
