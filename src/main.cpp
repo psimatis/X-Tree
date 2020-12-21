@@ -1,4 +1,4 @@
-// Copyright 2020 Roger Peralta Aranibar Advanced Data Estructures
+// Copyright 2020 Roger Peralta Aranibar Advanced Data Structures
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -14,7 +14,7 @@
 
 #define FILENAME "../data/data.csv"
 
-const float NORMALIZE_VALUES[14] = {1, 1, 1, 3.49977e+06, 1, 1, 1, 11.f, 1, 63.85f, 1, 76, 1, 221.741f};
+const float NORMALIZE_VALUES[14] = {1, 1, 1, 3.49977e+05, 1, 1, 1, 11.f, 1, 63.85f, 1, 76, 1, 221.741f};
 
 struct SongHeader {
   std::string id;
@@ -56,22 +56,16 @@ std::istream& operator>>(std::istream& is, Song& song) {
      >> song.attributes[11].begin() >> song.release_date   >> song.attributes[12].begin()
      >> song.attributes[13].begin();
 
-  for (int i = 0; i < 14; ++i)
-    song.attributes[i].end() = song.attributes[i].begin();
-
   // Normalize values
-  song.attributes[3].begin() = song.attributes[3].end() =
-                                 song.attributes[3].begin() / 3.49977e+06;
-  song.attributes[7].begin() = song.attributes[7].end() =
-                                 song.attributes[7].begin() / 11.f;
-  song.attributes[9].begin() = song.attributes[9].end() =
-                                 song.attributes[9].begin() + 60.f;
-  song.attributes[9].begin() = song.attributes[9].end() =
-                                 song.attributes[9].begin() / 63.85f;
-  song.attributes[11].begin() = song.attributes[11].end() =
-                                  song.attributes[11].begin() / 76.f;
-  song.attributes[13].begin() = song.attributes[13].end() =
-                                  song.attributes[13].begin() / 221.741f;
+  for (int i = 0; i < 9; ++i)
+    song.attributes[i].begin() = song.attributes[i].end() = song.attributes[i].begin() / NORMALIZE_VALUES[i];
+
+  song.attributes[9].begin() = song.attributes[9].end() = song.attributes[9].begin() + 60.f;
+  song.attributes[9].begin() = song.attributes[9].end() = song.attributes[9].begin() / NORMALIZE_VALUES[9];
+  
+  for (int i = 10; i < 14; ++i)
+    song.attributes[i].begin() = song.attributes[i].end() = song.attributes[i].begin() / NORMALIZE_VALUES[i];
+
   return is;
 }
 
@@ -180,12 +174,14 @@ float euclidean_dist(const std::vector<float>& p1,
 }
 
 void normalize_query(std::vector<float>& query) {
-  query[3] /= 3.49977e+06;
-  query[7] /= 11.f;
+  for (int i = 0; i < 9; ++i)
+    query[i] /= NORMALIZE_VALUES[i];
+
   query[9] += 60.f;
-  query[9] /= 63.85f;
-  query[11] /= 76.f;
-  query[13] /= 221.741f;
+  query[9] /= NORMALIZE_VALUES[9];
+  
+  for (int i = 10; i < 14; ++i)
+    query[i] /= NORMALIZE_VALUES[i];
 }
 
 void print_denormalized_result(
