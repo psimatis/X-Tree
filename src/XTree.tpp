@@ -1,5 +1,7 @@
 #pragma once
 
+using namespace std;
+
 template <size_t N, typename ElemType, size_t M, size_t m>
 XTree<N, ElemType, M, m>::XTree()
   : root(std::make_shared<XNode>()), entry_count(0) {}
@@ -23,13 +25,11 @@ bool XTree<N, ElemType, M, m>::empty() const {
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-void XTree<N, ElemType, M, m>::insert(const Hyperrectangle<N>& box,
-                                      const ElemType& value) {
+void XTree<N, ElemType, M, m>::insert(const Hyperrectangle<N>& box, const ElemType& value) {
   auto split_node_and_axis = chooseLeaf(root, box, value);
   ++entry_count;
 
-  if (!split_node_and_axis)
-    return;
+  if (!split_node_and_axis) return;
 
   auto new_root = std::make_shared<XNode>();
   new_root->entries[0].child_pointer = root;
@@ -91,22 +91,21 @@ size_t getMinOverlapHyperrectangle(std::shared_ptr<typename XNODE> node,
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
-    XTree<N, ElemType, M, m>::chooseLeaf(
-      const std::shared_ptr<XNode>& current_node,
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>XTree<N, ElemType, M, m>::chooseLeaf(
+      const std::shared_ptr<XNode>& n,
       const Hyperrectangle<N>& box,
       const ElemType& value) {
-  if (!current_node->isLeaf()) {
+  if (!n->isLeaf()) {
     SpatialObject* entry;
-    auto next_node = chooseNode(current_node, box, entry);
+    auto next_node = chooseNode(n, box, entry);
     auto split_node_and_axis = chooseLeaf(next_node, box, value);
-    return adjustTree(current_node, next_node, split_node_and_axis, entry);
+    return adjustTree(n, next_node, split_node_and_axis, entry);
   }
 
   SpatialObject new_entry;
   new_entry.box = box;
   new_entry.identifier = value;
-  return current_node->insert(new_entry);
+  return n->insert(new_entry);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
@@ -206,9 +205,7 @@ class kNN_comparison {
 };
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-void XTree<N, ElemType, M, m>::kNNProcess(
-    const std::shared_ptr<XNode> current_node,
-    const Hyperrectangle<N>& point, size_t k) {
+void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode> current_node, const Hyperrectangle<N>& point, size_t k) {
   float dist, min_dist, min_max_dist;
   size_t last;
 
@@ -329,4 +326,44 @@ float minMaxDist(const Hyperrectangle<N>& point, const Hyperrectangle<N>& hr) {
   }
 
   return min_max_dist;
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+void XTree<N, ElemType, M, m>::getNodeCount(const shared_ptr<XNode> n, int &lCount, int &dCount) {
+    if (n->isLeaf()) {
+        lCount++;
+    }
+    else{
+        dCount++;
+        for (size_t i = 0; i < n->size; ++i)
+            getNodeCount(n->entries[i].child_pointer, lCount, dCount);
+    }
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+void XTree<N, ElemType, M, m>::getHeight(const shared_ptr<XNode> n, int &h){
+    h++;
+    if (n->isLeaf()) return;
+    getHeight(n->entries[0].child_pointer, h);
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+void XTree<N, ElemType, M, m>::getStats() {
+    int l = 0, d = 0, h = 0;
+    getNodeCount(root, l, d);
+    getHeight(root, h);
+    cout << "Height: " << h << endl;
+    cout << "Leaves: " << l << endl;
+    cout << "Directories: " << d << endl;
+    cout << "Point count: " << entry_count << endl;
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+void XTree<N, ElemType, M, m>::snapshot(const shared_ptr<XNode> n) {
+    if (n->isLeaf()) cout << "leaf " << n->size <<  endl;
+    else{
+        cout << "internal " << n->size << endl;
+        for (size_t i = 0; i < n->size; ++i)
+            snapshot(n->entries[i].child_pointer);
+    }
 }

@@ -1,6 +1,7 @@
 #pragma once
+
+#include "def.h"
 #include "Interval.hpp"
-#include <array>
 
 template <size_t N>
 struct Hyperrectangle {
@@ -29,8 +30,10 @@ struct Hyperrectangle {
 
   void adjust(const Hyperrectangle& other);
 
- private:
+ //private:
   std::array<Interval, N> bounds;
+
+    void print();
 };
 
 #include "Hyperrectangle.tpp"

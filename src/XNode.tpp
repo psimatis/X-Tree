@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+#include "def.h"
 
 template <size_t N, typename ElemType, size_t M, size_t m> XNODE::XNode() :
   size(0) {
@@ -163,8 +163,7 @@ std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
-    XNODE::insert(const SpatialObject& new_entry) {
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>XNODE::insert(const SpatialObject& new_entry) {
   if (size < entries.size()) {
     entries[size++] = new_entry;
     return nullptr;

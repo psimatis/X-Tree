@@ -1,14 +1,9 @@
 #pragma once
-#include <memory>
-#include <vector>
-#include <float.h>
-#include <algorithm>
-#include <stack>
-#include <queue>
 
+#include "def.h"
 #include "Hyperrectangle.hpp"
 
-#define MAX_OVERLAP 0.2f
+using namespace std;
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 class kNN_comparison;
@@ -97,7 +92,7 @@ struct XTree {
   void insert(const Hyperrectangle<N>& box, const ElemType& value);
 
   std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> chooseLeaf(
-        const std::shared_ptr<XNode>& current_node,
+        const std::shared_ptr<XNode>& n,
         const Hyperrectangle<N>& box,
         const ElemType& value);
 
@@ -125,6 +120,13 @@ struct XTree {
   std::priority_queue<std::pair<const SpatialObject*, float>,
                       std::vector<std::pair<const SpatialObject*,
                       float>>, kNN_comparison<N, ElemType, M, m>> kNN_result;
+
+
+    void getStats();
+    void snapshot(const shared_ptr<XNode> n);
+    void getNodeCount(const shared_ptr<XNode> n, int &lCount, int &dCount);
+
+    void getHeight(const shared_ptr<XNode> n, int &h);
 };
 
 #define XNODE XTree<N, ElemType, M, m>::XNode

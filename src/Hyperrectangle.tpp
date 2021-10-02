@@ -1,5 +1,7 @@
 #pragma once
 
+using namespace std;
+
 template <size_t N>
 Interval& Hyperrectangle<N>::operator[](size_t index) {
   return bounds[index];
@@ -21,8 +23,7 @@ Hyperrectangle<N>::Hyperrectangle(const Hyperrectangle<N>& other) {
 template <size_t N> Hyperrectangle<N>::~Hyperrectangle() {}
 
 template <size_t N>
-Hyperrectangle<N>& Hyperrectangle<N>::operator=(
-                                  const Hyperrectangle<N>& other) {
+Hyperrectangle<N>& Hyperrectangle<N>::operator=(const Hyperrectangle<N>& other) {
   if (this != &other)
     std::copy(other.begin(), other.end(), begin());
 
@@ -102,4 +103,11 @@ float overlap(const Hyperrectangle<N>& hr1, const Hyperrectangle<N>& hr2) {
   }
 
   return overlap;
+}
+
+template <size_t N>
+void Hyperrectangle<N>::print() {
+    for (size_t i = 0; i < N; ++i)
+        cout << (*this)[i].begin() << " ";
+    cout << endl;
 }
