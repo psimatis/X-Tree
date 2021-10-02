@@ -169,22 +169,19 @@ std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>& XTree<N, ElemType, M, m>::kNN(
-const Hyperrectangle<N>& point, size_t k) {
-  query_result.clear();
+vector<string> XTree<N, ElemType, M, m>::kNN(Hyperrectangle<DIM>& point, int k) {
+    vector<string> res;
+    for (size_t i = 0; i < k; ++i)
+        kNN_result.push(make_pair(nullptr, FLT_MAX));
 
-  for (size_t i = 0; i < k; ++i)
-    kNN_result.push(std::make_pair(nullptr, FLT_MAX));
+    kNNProcess(root, point, k);
 
-  kNNProcess(root, point, k);
-
-  for (size_t i = 0; i < k; ++i) {
-    auto entry = kNN_result.top().first;
-    query_result.push_back(std::make_pair(&entry->box, &entry->identifier));
-    kNN_result.pop();
-  }
-
-  return query_result;
+    for (size_t i = 0; i < k; ++i) {
+        auto entry = kNN_result.top().first;
+        res.push_back(entry->identifier);
+        kNN_result.pop();
+    }
+    return res;
 }
 
 template <size_t N>
@@ -205,60 +202,99 @@ class kNN_comparison {
 };
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-void XTree<N, ElemType, M, m>::kNNProcess(const std::shared_ptr<XNode> current_node, const Hyperrectangle<N>& point, size_t k) {
-  float dist, min_dist, min_max_dist;
-  size_t last;
+void XTree<N, ElemType, M, m>::kNNProcess(const shared_ptr<XNode> n, const Hyperrectangle<N>& point, size_t k) {
+    float dist, min_dist, min_max_dist;
+    size_t last;
 
-  if (current_node->isLeaf()) {
-    for (const auto& entry : current_node->entries) {
-      dist = objectDist(point, entry.box);
+    if (n->isLeaf()) {
+        for (const auto& e : n->entries) {
+            dist = objectDist(point, e.box);
 
-      if (kNN_result.top().second > dist) {
-        kNN_result.pop();
-        kNN_result.push(std::make_pair(&entry, dist));
-      }
-    }
-  } else {
-    std::vector<std::tuple<std::shared_ptr<XNode>, float, float>> branchList;
-
-    for (size_t i = 0; i < current_node->size; ++i) {
-      auto entry = current_node->entries[i];
-      min_dist = minDist(point, entry.box);
-      min_max_dist = minMaxDist(point, entry.box);
-
-      // Tuple <Node, minDist, minMaxDist>
-      branchList.push_back(std::make_tuple(entry.child_pointer, min_dist,
-                                           min_max_dist));
-    }
-
-    std::sort(branchList.begin(), branchList.end(),
-              [](const std::tuple<std::shared_ptr<XNode>, float, float>& lhs,
-    const std::tuple<std::shared_ptr<XNode>, float, float>& rhs) {
-      return std::get<1>(lhs) < std::get<1>(rhs);
-    });
-    last = branchList.size();
-
-    // Discard MBRs. Strategy 1
-    for (size_t i = 0; i < branchList.size(); ++i) {
-      for (size_t j = 0; j < branchList.size(); ++j) {
-        if (i == j) continue;
-
-        if (std::get<2>(branchList[i]) < std::get<1>(branchList[j])) {
-          branchList.erase(branchList.begin() + j);
-          --last;
+            if (kNN_result.top().second > dist) {
+                kNN_result.pop();
+                kNN_result.push(std::make_pair(&e, dist));
+            }
         }
-      }
     }
+    else {
+        vector<tuple<shared_ptr<XNode>, float, float>> branchList;
 
-    for (size_t i = 0; i < branchList.size(); ++i) {
-      auto next_node = std::get<0>(branchList[i]);
-      kNNProcess(next_node, point, k);
-      for (size_t j = 0; j < branchList.size(); ++j) {
-        if (std::get<1>(branchList[j]) > kNN_result.top().second)
-        branchList.erase(branchList.begin() + j);
-      }
+        for (size_t i = 0; i < n->size; ++i) {
+            auto entry = n->entries[i];
+            min_dist = minDist(point, entry.box);
+            min_max_dist = minMaxDist(point, entry.box);
+
+            // Tuple <Node, minDist, minMaxDist>
+            branchList.push_back(std::make_tuple(entry.child_pointer, min_dist,min_max_dist));
+        }
+
+        sort(branchList.begin(), branchList.end(),
+                  [](const std::tuple<std::shared_ptr<XNode>, float, float>& lhs,
+                     const std::tuple<std::shared_ptr<XNode>, float, float>& rhs) {
+                      return std::get<1>(lhs) < std::get<1>(rhs);
+                  });
+        last = branchList.size();
+
+        // Discard MBRs. Strategy 1
+        for (size_t i = 0; i < branchList.size(); ++i) {
+            for (size_t j = 0; j < branchList.size(); ++j) {
+                if (i == j) continue;
+
+                if (std::get<2>(branchList[i]) < std::get<1>(branchList[j])) {
+                    branchList.erase(branchList.begin() + j);
+                    --last;
+                }
+            }
+        }
+
+        for (size_t i = 0; i < branchList.size(); ++i) {
+            auto next_node = std::get<0>(branchList[i]);
+            kNNProcess(next_node, point, k);
+            for (size_t j = 0; j < branchList.size(); ++j) {
+                if (std::get<1>(branchList[j]) > kNN_result.top().second)
+                    branchList.erase(branchList.begin() + j);
+            }
+        }
     }
-  }
+}
+
+bool contains(Hyperrectangle<DIM> r, Hyperrectangle<DIM> qr){
+    for (int i = 0; i < DIM; i++){
+        if(!(qr[i].begin() <= r[i].begin() && r[i].end() <= qr[i].end())) return false;
+    }
+    return true;
+}
+
+bool intersects(Hyperrectangle<DIM> r, Hyperrectangle<DIM> qr){
+    bool intersect = true;
+    for (int i = 0; i < DIM; i++){
+        intersect = intersect && !(r[i].begin() > qr[i].end()) && !(qr[i].begin() > r[i].end());
+        if (!intersect) return false;
+    }
+    return true;
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+void XTree<N, ElemType, M, m>::rangeSearch(const shared_ptr<XNode> n, Hyperrectangle<DIM> qr, vector<string> &result) {
+    if (n->isLeaf()) {
+        for (size_t i = 0; i < n->size; ++i) {
+            if (contains(n->entries[i].box, qr))
+                result.push_back(n->entries[i].identifier);
+        }
+    }
+    else{
+        for (size_t i = 0; i < n->size; ++i){
+            if (intersects(n->entries[i].box, qr))
+                rangeSearch(n->entries[i].child_pointer, qr, result);
+        }
+    }
+}
+
+template <size_t N, typename ElemType, size_t M, size_t m>
+vector<string> XTree<N, ElemType, M, m>::rangeQuery(Hyperrectangle<DIM> qr) {
+    vector<string> result;
+    rangeSearch(root, qr, result);
+    return result;
 }
 
 template <size_t N>

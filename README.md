@@ -47,7 +47,7 @@ index all the data points.
 
 Once the data is loaded, you will be prompted to start making kNN queries. You
 will be asked for a k, number of Nearest Neighbors to be retrieved, and then
-the query point from which start the search. You will need to enter the values
+the Query point from which start the search. You will need to enter the values
 in the following order of attributes: `valence, acousticness, daceability,
    duration_ms, energy, explicit, instrumentalness, key, liveness, loudness,
    mode, popularity, speechiness, tempo`.

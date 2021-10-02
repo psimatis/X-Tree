@@ -106,20 +106,16 @@ struct XTree {
         const std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>>& right,
         SpatialObject* entry);
 
-  void kNNProcess(const std::shared_ptr<XNode> current_node,
+  void kNNProcess(const std::shared_ptr<XNode> n,
                   const Hyperrectangle<N>& point,
                   size_t k);
 
-  std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>>& kNN(
-        const Hyperrectangle<N>& point,
-        size_t k);
+  //std::vector<std::pair<const Hyperrectangle<DIM>*, const ElemType*>>& kNN(const Hyperrectangle<N>& point,size_t k);
+  vector<string> kNN(Hyperrectangle<DIM>& point, int k);
 
   std::shared_ptr<XNode> root;
   size_t entry_count;
-  std::vector<std::pair<const Hyperrectangle<14>*, const ElemType*>> query_result;
-  std::priority_queue<std::pair<const SpatialObject*, float>,
-                      std::vector<std::pair<const SpatialObject*,
-                      float>>, kNN_comparison<N, ElemType, M, m>> kNN_result;
+  std::priority_queue<std::pair<const SpatialObject*, float>, std::vector<std::pair<const SpatialObject*, float>>, kNN_comparison<N, ElemType, M, m>> kNN_result;
 
 
     void getStats();
@@ -127,6 +123,10 @@ struct XTree {
     void getNodeCount(const shared_ptr<XNode> n, int &lCount, int &dCount);
 
     void getHeight(const shared_ptr<XNode> n, int &h);
+
+    vector<string> rangeQuery(Hyperrectangle<4> qr);
+
+    void rangeSearch(const shared_ptr<XNode> n, Hyperrectangle<4> qr, vector<string> &result);
 };
 
 #define XNODE XTree<N, ElemType, M, m>::XNode

@@ -17,8 +17,10 @@
 #include <stack>
 #include <queue>
 #include <array>
+#include <map>
 
-#define FILENAME "../data/4D-1e6"
+#define DATA_FILE "../data/4D-1e6"
+#define QUERY_FILE "../data/4D-qI0"
 #define DIM 4
 #define CAPACITY 20
 #define LIMIT 100000
