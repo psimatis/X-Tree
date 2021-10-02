@@ -90,13 +90,6 @@ vector<Query> parseQueryFile(string fileName) {
     return queryArray;
 }
 
-XTree<DIM, string, CAPACITY> xtree;
-
-void buildIndex(vector<Record> data) {
-    for (size_t i = 0; i < data.size(); ++i)
-        xtree.insert(data[i].p, data[i].id);
-}
-
 vector<string> sequentialScanKNN(vector<Record> &dataArray, Hyperrectangle<DIM> q, int k){
     priority_queue<pair<float, string>> result;
     for (auto d: dataArray){
@@ -125,19 +118,17 @@ vector<string> sequentialScanRange(vector<Record> &dataArray, Hyperrectangle<DIM
     return result;
 }
 
-
-
 int main(int argc, char **argv) {
     if (argc != 4){
         cout << "Usage: ./xtree dataFile limit queryFile" << endl;
         exit(1);
     }
 
-    int limit = atoi(argv[2]);
+    vector<Record> dataArray = parseDataFile(argv[1], atoi(argv[2]));
 
-    vector<Record> dataArray = parseDataFile(argv[1], limit);
     high_resolution_clock::time_point startTime = high_resolution_clock::now();
-    buildIndex(dataArray);
+    XTree<DIM, string, CAPACITY> xtree;
+    for (auto d: dataArray) xtree.insert(d.p, d.id);
     double creationTime = duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
     cout << "Index creation time: " << creationTime << endl;
     xtree.getStats();
@@ -146,33 +137,37 @@ int main(int argc, char **argv) {
 
     map<string, double> rangeLog, knnLog, inLog;
     for (auto q: queryArray) {
+        xtree.queryLeafCount = 0;
         if (q.type == 'r') {
             float rs = q.info;
             startTime = high_resolution_clock::now();
             vector<string> results = xtree.rangeQuery(q.p);
             rangeLog["time " + to_string(rs)] += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
             rangeLog["count " + to_string(rs)]++;
-            //rangeLog["leaf " + to_string(rs)] += xtree.queryLeafCount;
+            rangeLog["leaf " + to_string(rs)] += xtree.queryLeafCount;
+
             startTime = high_resolution_clock::now();
             vector<string> resS = sequentialScanRange(dataArray, q.p);
             rangeLog["seq " + to_string(rs)] += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
-            //cout << "range:";
-            cout << results.size() << "-" << resS.size() << endl;
+
+            // Compare results with sequential scan
+            //cout << results.size() << "-" << resS.size() << endl;
         }
-        if (q.type == 'k') {/*
+        if (q.type == 'k') {
             int k = q.info;
-            //high_resolution_clock::time_point startTime = high_resolution_clock::now();
-            vector<string> results = xtree.kNN(q.p, k);
-            //knnLog["time " + to_string(k)] += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
+            high_resolution_clock::time_point startTime = high_resolution_clock::now();
+            vector<string> results = xtree.kNNQuery(q.p, k);
+            knnLog["time " + to_string(k)] += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
             knnLog["count " + to_string(k)]++;
-            //knnLog["leaf " + to_string(k)] += xtree.queryLeafCount;
-            //startTime = high_resolution_clock::now();
+            knnLog["leaf " + to_string(k)] += xtree.queryLeafCount;
+
+            startTime = high_resolution_clock::now();
             vector<string> resS = sequentialScanKNN(dataArray, q.p, k);
-            //knnLog["seq " + to_string(k)] += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
-            sort(results.begin(), results.end());
-            sort(resS.begin(), resS.end());
-            cout << "knn: " << endl;
-            for (int i = 0; i < k; i++) cout << results[i] << " --- " << resS[i] << endl;*/
+            knnLog["seq " + to_string(k)] += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
+
+            //Compare results with sequential scan
+            //cout << "knn: " << endl;
+            //for (int i = 0; i < k; i++) cout << results[i] << " --- " << resS[i] << endl;
         } else if (q.type == 'l') {
             cout << "---Range---" << endl;
             for (auto it = rangeLog.begin(); it != rangeLog.end(); ++it) {

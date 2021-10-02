@@ -168,94 +168,54 @@ std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
   return parent->insert(new_entry);
 }
 
-template <size_t N, typename ElemType, size_t M, size_t m>
-vector<string> XTree<N, ElemType, M, m>::kNN(Hyperrectangle<DIM>& point, int k) {
-    vector<string> res;
-    for (size_t i = 0; i < k; ++i)
-        kNN_result.push(make_pair(nullptr, FLT_MAX));
-
-    kNNProcess(root, point, k);
-
-    for (size_t i = 0; i < k; ++i) {
-        auto entry = kNN_result.top().first;
-        res.push_back(entry->identifier);
-        kNN_result.pop();
-    }
-    return res;
-}
-
 template <size_t N>
 float objectDist(const Hyperrectangle<N>& point, const Hyperrectangle<N>& obj);
+
 template <size_t N>
 float minDist(const Hyperrectangle<N>& lhs, const Hyperrectangle<N>& rhs);
+
 template <size_t N>
 float minMaxDist(const Hyperrectangle<N>& lhs, const Hyperrectangle<N>& rhs);
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-class kNN_comparison {
- public:
-  bool operator()
-    (const std::pair<const typename XTree<N, ElemType, M, m>::SpatialObject*, float>& lhs,
-     const std::pair<const typename XTree<N, ElemType, M, m>::SpatialObject*, float>& rhs) {
-    return lhs.second < rhs.second;
-  }
-};
-
-template <size_t N, typename ElemType, size_t M, size_t m>
-void XTree<N, ElemType, M, m>::kNNProcess(const shared_ptr<XNode> n, const Hyperrectangle<N>& point, size_t k) {
-    float dist, min_dist, min_max_dist;
-    size_t last;
-
-    if (n->isLeaf()) {
-        for (const auto& e : n->entries) {
-            dist = objectDist(point, e.box);
-
-            if (kNN_result.top().second > dist) {
-                kNN_result.pop();
-                kNN_result.push(std::make_pair(&e, dist));
+vector<string> XTree<N, ElemType, M, m>::kNNQuery(Hyperrectangle<DIM>& q, int k) {
+    class Compare{
+    public:
+        bool operator()(pair<string, float> &l, pair<string, float> &r) const
+        { return l.second < r.second; }
+    };
+    class Compare2{
+    public:
+        bool operator()(pair<shared_ptr<XNode>, float> &l, pair<shared_ptr<XNode>, float> &r) const
+        { return l.second > r.second; }
+    };
+    priority_queue<pair<string, float>, vector<pair<string, float>>, Compare> knnPts;
+    priority_queue<pair<shared_ptr<XNode>, float>, vector<pair<shared_ptr<XNode>, float>>, Compare2>  toVisit;
+    toVisit.push(make_pair(root, 0));
+    for (int i = 0; i < k; i++) knnPts.push(make_pair("", FLT_MAX));
+    float dist, minD;
+    while (!toVisit.empty()) {
+        shared_ptr<XNode> n = toVisit.top().first;
+        toVisit.pop();
+        for (int i = 0; i < n->size; i++) {
+            minD = knnPts.top().second;
+            if (n->isLeaf()) dist = objectDist(n->entries[i].box, q);
+            else dist = minDist(q, n->entries[i].box);
+            if (dist < minD) {
+                if (n->isLeaf()) {
+                    knnPts.pop();
+                    knnPts.push(make_pair(n->entries[i].identifier, dist));
+                    queryLeafCount++;
+                } else toVisit.push(make_pair(n->entries[i].child_pointer, dist));
             }
         }
     }
-    else {
-        vector<tuple<shared_ptr<XNode>, float, float>> branchList;
-
-        for (size_t i = 0; i < n->size; ++i) {
-            auto entry = n->entries[i];
-            min_dist = minDist(point, entry.box);
-            min_max_dist = minMaxDist(point, entry.box);
-
-            // Tuple <Node, minDist, minMaxDist>
-            branchList.push_back(std::make_tuple(entry.child_pointer, min_dist,min_max_dist));
-        }
-
-        sort(branchList.begin(), branchList.end(),
-                  [](const std::tuple<std::shared_ptr<XNode>, float, float>& lhs,
-                     const std::tuple<std::shared_ptr<XNode>, float, float>& rhs) {
-                      return std::get<1>(lhs) < std::get<1>(rhs);
-                  });
-        last = branchList.size();
-
-        // Discard MBRs. Strategy 1
-        for (size_t i = 0; i < branchList.size(); ++i) {
-            for (size_t j = 0; j < branchList.size(); ++j) {
-                if (i == j) continue;
-
-                if (std::get<2>(branchList[i]) < std::get<1>(branchList[j])) {
-                    branchList.erase(branchList.begin() + j);
-                    --last;
-                }
-            }
-        }
-
-        for (size_t i = 0; i < branchList.size(); ++i) {
-            auto next_node = std::get<0>(branchList[i]);
-            kNNProcess(next_node, point, k);
-            for (size_t j = 0; j < branchList.size(); ++j) {
-                if (std::get<1>(branchList[j]) > kNN_result.top().second)
-                    branchList.erase(branchList.begin() + j);
-            }
-        }
+    vector<string> res;
+    for (size_t i = 0; i < k; ++i) {
+        res.push_back(knnPts.top().first);
+        knnPts.pop();
     }
+    return res;
 }
 
 bool contains(Hyperrectangle<DIM> r, Hyperrectangle<DIM> qr){
@@ -277,6 +237,7 @@ bool intersects(Hyperrectangle<DIM> r, Hyperrectangle<DIM> qr){
 template <size_t N, typename ElemType, size_t M, size_t m>
 void XTree<N, ElemType, M, m>::rangeSearch(const shared_ptr<XNode> n, Hyperrectangle<DIM> qr, vector<string> &result) {
     if (n->isLeaf()) {
+        queryLeafCount++;
         for (size_t i = 0; i < n->size; ++i) {
             if (contains(n->entries[i].box, qr))
                 result.push_back(n->entries[i].identifier);
@@ -329,46 +290,9 @@ float minDist(const Hyperrectangle<N>& point, const Hyperrectangle<N>& hr) {
   return dist;
 }
 
-template <size_t N>
-float minMaxDist(const Hyperrectangle<N>& point, const Hyperrectangle<N>& hr) {
-  float min_max_dist = FLT_MAX;
-  float dist = 0;
-  float rm_k, rM_i;
-  float tmp_dist;
-
-  for (size_t i = 0; i < N; ++i) {
-    if (point[i].begin() <= (hr[i].begin() + hr[i].end())/2)
-      rm_k = hr[i].begin();
-    else
-      rm_k = hr[i].end();
-
-    tmp_dist = point[i].begin() - rm_k;
-    dist = tmp_dist*tmp_dist;
-
-    for (size_t j = 0; j < N; ++j) {
-      if (i == j) continue;
-
-      if (point[i].begin() >= (hr[i].begin() + hr[i].end())/2)
-        rM_i = hr[i].begin();
-      else
-        rM_i = hr[i].end();
-
-      tmp_dist = point[i].begin() - rM_i;
-      dist += tmp_dist*tmp_dist;
-    }
-
-    if (dist < min_max_dist)
-      min_max_dist = dist;
-  }
-
-  return min_max_dist;
-}
-
 template <size_t N, typename ElemType, size_t M, size_t m>
 void XTree<N, ElemType, M, m>::getNodeCount(const shared_ptr<XNode> n, int &lCount, int &dCount) {
-    if (n->isLeaf()) {
-        lCount++;
-    }
+    if (n->isLeaf()) lCount++;
     else{
         dCount++;
         for (size_t i = 0; i < n->size; ++i)
@@ -391,7 +315,10 @@ void XTree<N, ElemType, M, m>::getStats() {
     cout << "Height: " << h << endl;
     cout << "Leaves: " << l << endl;
     cout << "Directories: " << d << endl;
-    cout << "Point count: " << entry_count << endl;
+    cout << "Entries: " << entry_count << endl;
+    cout << "Capacity: " << CAPACITY << endl;
+    cout << "Dimensions: " << DIM << endl;
+    cout << "Max overlap: " << MAX_OVERLAP << endl;
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>

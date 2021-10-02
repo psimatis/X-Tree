@@ -5,8 +5,6 @@
 
 using namespace std;
 
-template <size_t N, typename ElemType, size_t M, size_t m>
-class kNN_comparison;
 
 template <size_t N, typename ElemType, size_t M, size_t m = size_t(M*0.4)>
 struct XTree {
@@ -72,8 +70,7 @@ struct XTree {
 
     size_t chooseSplitAxis(const SpatialObject& new_entry);
 
-    std::shared_ptr<XNode> chooseSplitIndex(size_t axis,
-                                            const SpatialObject& new_entry);
+    std::shared_ptr<XNode> chooseSplitIndex(size_t axis,const SpatialObject& new_entry);
 
     std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> overlap_minimal_split();
 
@@ -106,27 +103,17 @@ struct XTree {
         const std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>>& right,
         SpatialObject* entry);
 
-  void kNNProcess(const std::shared_ptr<XNode> n,
-                  const Hyperrectangle<N>& point,
-                  size_t k);
-
-  //std::vector<std::pair<const Hyperrectangle<DIM>*, const ElemType*>>& kNN(const Hyperrectangle<N>& point,size_t k);
-  vector<string> kNN(Hyperrectangle<DIM>& point, int k);
-
   std::shared_ptr<XNode> root;
   size_t entry_count;
-  std::priority_queue<std::pair<const SpatialObject*, float>, std::vector<std::pair<const SpatialObject*, float>>, kNN_comparison<N, ElemType, M, m>> kNN_result;
 
-
+    int queryLeafCount;
     void getStats();
     void snapshot(const shared_ptr<XNode> n);
     void getNodeCount(const shared_ptr<XNode> n, int &lCount, int &dCount);
-
     void getHeight(const shared_ptr<XNode> n, int &h);
-
-    vector<string> rangeQuery(Hyperrectangle<4> qr);
-
+    vector<string> rangeQuery(Hyperrectangle<DIM> qr);
     void rangeSearch(const shared_ptr<XNode> n, Hyperrectangle<4> qr, vector<string> &result);
+    vector<string> kNNQuery(Hyperrectangle<DIM> &point, int k);
 };
 
 #define XNODE XTree<N, ElemType, M, m>::XNode
