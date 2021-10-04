@@ -88,21 +88,16 @@ void Hyperrectangle<N>::adjust(const Hyperrectangle& other) {
 
 template <size_t N>
 float overlap(const Hyperrectangle<N>& hr1, const Hyperrectangle<N>& hr2) {
-  float overlap = 1.f;
+    float overlap = 1.f;
 
-  for (size_t i = 0; i < N; ++i) {
-    float length = 0.f;
-
-    if ((hr2[i].begin() < hr1[i].end() && hr1[i].begin() < hr2[i].end())
-        || (hr1[i].begin() < hr2[i].end() && hr2[i].begin() < hr1[i].end())) {
-      length = std::min(hr1[i].end(), hr2[i].end())
-               - std::max(hr1[i].begin(), hr2[i].begin());
+    for (size_t i = 0; i < N; ++i) {
+        if ((hr2[i].begin() < hr1[i].end() && hr1[i].begin() < hr2[i].end()))
+            overlap *= hr1[i].end() - hr2[i].begin();
+        else if(hr1[i].begin() < hr2[i].end() && hr2[i].begin() < hr1[i].end())
+            overlap *= hr2[i].end() - hr1[i].begin();
+        else return 0;
     }
-
-    overlap *= length;
-  }
-
-  return overlap;
+    return overlap;
 }
 
 template <size_t N>

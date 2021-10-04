@@ -149,21 +149,27 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
   return new_node;
 }
 
+
+using namespace std::chrono;
+
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
-    XNODE::topological_split(const SpatialObject& new_entry) {
-  auto split_axis = chooseSplitAxis(new_entry);
-  auto new_node = chooseSplitIndex(split_axis, new_entry);
+std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>XNODE::topological_split(const SpatialObject& new_entry) {
+    high_resolution_clock::time_point startTime = high_resolution_clock::now();
+    auto split_axis = chooseSplitAxis(new_entry);
+    timeSplitAxis += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
 
-  if (!new_node)
-    return nullptr;
+    startTime = high_resolution_clock::now();
+    auto new_node = chooseSplitIndex(split_axis, new_entry);
+    timeSplitIndex += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
 
-  return std::make_shared<std::pair<std::shared_ptr<XNode>, size_t>>
-         (new_node, split_axis);
+    if (!new_node) return nullptr;
+
+  return make_shared<std::pair<std::shared_ptr<XNode>, size_t>> (new_node, split_axis);
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>XNODE::insert(const SpatialObject& new_entry) {
+
   if (size < entries.size()) {
     entries[size++] = new_entry;
     return nullptr;
@@ -175,7 +181,7 @@ std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>XNODE::insert
 
   new_node_and_axis = overlap_minimal_split();
   if (new_node_and_axis != nullptr)
-    return new_node_and_axis;
+      return new_node_and_axis;
 
   // Create Supernode
   entries.resize(entries.size() + M);

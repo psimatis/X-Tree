@@ -118,6 +118,8 @@ vector<string> sequentialScanRange(vector<Record> &dataArray, Hyperrectangle<DIM
     return result;
 }
 
+
+
 int main(int argc, char **argv) {
     if (argc != 4){
         cout << "Usage: ./xtree dataFile limit queryFile" << endl;
@@ -132,6 +134,18 @@ int main(int argc, char **argv) {
     double creationTime = duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
     cout << "Index creation time: " << creationTime << endl;
     xtree.getStats();
+
+    cout << timeSplitAxis << endl;
+    cout << timeSplitIndex << endl;
+    cout << "topsplit:" << timeTopSplit << endl;
+    cout << "overlap split:" << timeOverlapSplit << endl;
+    cout << "rootAdjust: " <<  rootAdjust << endl;
+    cout << "adjust: " <<  adjust << endl;
+    cout << "choose node: " <<  chooseNodeTime << endl;
+    cout << "choose node leaf: " <<  chooseNodeTimeL << endl;
+    cout << "choose node dir: " <<  chooseNodeTimeD << endl;
+    cout << "getMinOvHyp: " <<  getMinOvHyp << endl;
+    cout << "totalOverlapTime: " <<  totalOverlapTime << endl;
 
     vector<Query> queryArray = parseQueryFile(argv[3]);
 
@@ -151,7 +165,7 @@ int main(int argc, char **argv) {
             rangeLog["seq " + to_string(rs)] += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
 
             // Compare results with sequential scan
-            //cout << results.size() << "-" << resS.size() << endl;
+            cout << "Range query: " << results.size() << "-" << resS.size() << endl;
         }
         if (q.type == 'k') {
             int k = q.info;
@@ -166,8 +180,8 @@ int main(int argc, char **argv) {
             knnLog["seq " + to_string(k)] += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
 
             //Compare results with sequential scan
-            //cout << "knn: " << endl;
-            //for (int i = 0; i < k; i++) cout << results[i] << " --- " << resS[i] << endl;
+            cout << "knn: " << endl;
+            for (int i = 0; i < k; i++) cout << results[i] << " --- " << resS[i] << endl;
         } else if (q.type == 'l') {
             cout << "---Range---" << endl;
             for (auto it = rangeLog.begin(); it != rangeLog.end(); ++it) {

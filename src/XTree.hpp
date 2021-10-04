@@ -55,13 +55,6 @@ struct XTree {
 
     bool isLeaf();
 
-    void pickSeeds(std::vector<SpatialObject>& entries, size_t* first,
-                   size_t* second);
-
-    void pickNext(std::vector<SpatialObject>& entries, size_t* idx,
-                  const Hyperrectangle<N>& mbb_group1,
-                  const Hyperrectangle<N>& mbb_group2);
-
     std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> insert(
           const SpatialObject& new_entry);
 
@@ -115,6 +108,11 @@ struct XTree {
     void rangeSearch(const shared_ptr<XNode> n, Hyperrectangle<DIM> qr, vector<string> &result);
     vector<string> kNNQuery(Hyperrectangle<DIM> &point, int k);
 };
+
+static int timeSplitAxis = 0;
+static int timeSplitIndex = 0;
+static int timeTopSplit = 0;
+static int timeOverlapSplit = 0;
 
 #define XNODE XTree<N, ElemType, M, m>::XNode
 #define SH XTree<N, ElemType, M, m>::SplitHistory
