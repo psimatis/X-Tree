@@ -37,23 +37,9 @@ void XTree<N, ElemType, M, m>::insert(const Hyperrectangle<N>& box, const ElemTy
   auto new_root = std::make_shared<XNode>();
   new_root->entries[0].child_pointer = root;
   ++new_root->size;
-    high_resolution_clock::time_point startTime = high_resolution_clock::now();
 
   adjustTree(new_root, root, split_node_and_axis, &new_root->entries[0]);
-    rootAdjust += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
   root = new_root;
-}
-
-
-template <size_t N, typename ElemType, size_t M, size_t m>
-float getTotalOverlap(const Hyperrectangle<N>& box, const size_t& idx, const shared_ptr<typename XNODE>& node) {
-    float total_overlap = 0.f;
-    for (size_t i = 0; i < node->size; ++i){
-        if (i != idx){
-            total_overlap += overlap((*node)[i].box, box);
-        }
-    }
-    return total_overlap;
 }
 
 template <size_t N>
@@ -69,10 +55,6 @@ float getAreaEnlargement(const Hyperrectangle<N>& container, float containerArea
     enlarged_container.adjust(item);
     return enlarged_container.getArea() - containerArea;
 }
-
-int getMinOvHyp = 0;
-
-int totalOverlapTime = 0;
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 size_t getMinOverlapHyperrectangle(shared_ptr<typename XNODE> node, const Hyperrectangle<N>& box) {
@@ -128,10 +110,6 @@ std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>XTree<N, Elem
   return n->insert(new_entry);
 }
 
-int chooseNodeTime = 0;
-int chooseNodeTimeL = 0;
-int chooseNodeTimeD = 0;
-
 template <size_t N, typename ElemType, size_t M, size_t m>
 shared_ptr<typename XNODE> XTree<N, ElemType, M, m>::chooseNode(const shared_ptr<XNode>& current_node, const Hyperrectangle<N>& box, SpatialObject*& entry) {
     shared_ptr<XNode> node;
@@ -161,8 +139,6 @@ shared_ptr<typename XNODE> XTree<N, ElemType, M, m>::chooseNode(const shared_ptr
     return node;
 }
 
-int adjust = 0;
-
 template <size_t N, typename ElemType, size_t M, size_t m>
 std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
     XTree<N, ElemType, M, m>::adjustTree(
@@ -170,8 +146,6 @@ std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
       const std::shared_ptr<XNode>& left,
       const std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>>& right,
       SpatialObject* entry) {
-    high_resolution_clock::time_point startTime = high_resolution_clock::now();
-
   entry->box.reset();
 
   for (SpatialObject current_entry : *left)
@@ -188,7 +162,6 @@ std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>
 
   parent->split_history.insert(right->second, left, right->first);
   new_entry.child_pointer = right->first;
-    adjust += duration_cast<microseconds>(high_resolution_clock::now() - startTime).count();
   return parent->insert(new_entry);
 }
 

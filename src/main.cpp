@@ -135,18 +135,6 @@ int main(int argc, char **argv) {
     cout << "Index creation time: " << creationTime << endl;
     xtree.getStats();
 
-    cout << timeSplitAxis << endl;
-    cout << timeSplitIndex << endl;
-    cout << "topsplit:" << timeTopSplit << endl;
-    cout << "overlap split:" << timeOverlapSplit << endl;
-    cout << "rootAdjust: " <<  rootAdjust << endl;
-    cout << "adjust: " <<  adjust << endl;
-    cout << "choose node: " <<  chooseNodeTime << endl;
-    cout << "choose node leaf: " <<  chooseNodeTimeL << endl;
-    cout << "choose node dir: " <<  chooseNodeTimeD << endl;
-    cout << "getMinOvHyp: " <<  getMinOvHyp << endl;
-    cout << "totalOverlapTime: " <<  totalOverlapTime << endl;
-
     vector<Query> queryArray = parseQueryFile(argv[3]);
 
     map<string, double> rangeLog, knnLog, inLog;
