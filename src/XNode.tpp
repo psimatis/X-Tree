@@ -117,7 +117,7 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
     for (size_t f1 = 0; f1 < m - 1 + j; ++f1)
       first_group_hr.adjust(this->entries[f1].box);
 
-    for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2)
+    for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2) // check if i can merge these 2 for loops11
       second_group_hr.adjust(this->entries[f2].box);
 
     total_area = first_group_hr.getArea() + second_group_hr.getArea();

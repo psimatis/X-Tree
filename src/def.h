@@ -1,7 +1,3 @@
-//
-// Created by psimatis on 2/10/2021.
-//
-
 #ifndef X_TREE_DEF_H
 #define X_TREE_DEF_H
 
@@ -19,8 +15,8 @@
 #include <array>
 #include <map>
 
-#define DIM 4
-#define CAPACITY 100
+#define DIM 8
+#define CAPACITY 128
 #define MAX_OVERLAP 0.2f
 
 #endif //X_TREE_DEF_H

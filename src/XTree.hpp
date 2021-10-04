@@ -112,7 +112,7 @@ struct XTree {
     void getNodeCount(const shared_ptr<XNode> n, int &lCount, int &dCount);
     void getHeight(const shared_ptr<XNode> n, int &h);
     vector<string> rangeQuery(Hyperrectangle<DIM> qr);
-    void rangeSearch(const shared_ptr<XNode> n, Hyperrectangle<4> qr, vector<string> &result);
+    void rangeSearch(const shared_ptr<XNode> n, Hyperrectangle<DIM> qr, vector<string> &result);
     vector<string> kNNQuery(Hyperrectangle<DIM> &point, int k);
 };
 
