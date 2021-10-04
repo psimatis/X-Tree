@@ -1,5 +1,4 @@
 // Copyright 2020 Roger Peralta Aranibar Advanced Data Structures
-
 #include "XTree.hpp"
 
 using namespace std::chrono;
@@ -118,8 +117,6 @@ vector<string> sequentialScanRange(vector<Record> &dataArray, Hyperrectangle<DIM
     return result;
 }
 
-
-
 int main(int argc, char **argv) {
     if (argc != 4){
         cout << "Usage: ./xtree dataFile limit queryFile" << endl;
@@ -136,7 +133,6 @@ int main(int argc, char **argv) {
     xtree.getStats();
 
     vector<Query> queryArray = parseQueryFile(argv[3]);
-
     map<string, double> rangeLog, knnLog, inLog;
     for (auto q: queryArray) {
         xtree.queryLeafCount = 0;

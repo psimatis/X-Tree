@@ -2,7 +2,6 @@
 
 using namespace std;
 
-
 template <size_t N, typename ElemType, size_t M, size_t m>
 XTree<N, ElemType, M, m>::XTree()
   : root(std::make_shared<XNode>()), entry_count(0) {}

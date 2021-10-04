@@ -5,7 +5,6 @@
 
 using namespace std;
 
-
 template <size_t N, typename ElemType, size_t M, size_t m = size_t(M*0.4)>
 struct XTree {
   struct XNode;
@@ -58,8 +57,7 @@ struct XTree {
     std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> insert(
           const SpatialObject& new_entry);
 
-    std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> topological_split(
-          const SpatialObject& new_entry);
+    std::shared_ptr<std::pair<std::shared_ptr<XNode>, size_t>> topological_split(const SpatialObject& new_entry);
 
     size_t chooseSplitAxis(const SpatialObject& new_entry);
 
@@ -108,11 +106,6 @@ struct XTree {
     void rangeSearch(const shared_ptr<XNode> n, Hyperrectangle<DIM> qr, vector<string> &result);
     vector<string> kNNQuery(Hyperrectangle<DIM> &point, int k);
 };
-
-static int timeSplitAxis = 0;
-static int timeSplitIndex = 0;
-static int timeTopSplit = 0;
-static int timeOverlapSplit = 0;
 
 #define XNODE XTree<N, ElemType, M, m>::XNode
 #define SH XTree<N, ElemType, M, m>::SplitHistory
