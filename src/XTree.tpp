@@ -24,8 +24,6 @@ bool XTree<N, ElemType, M, m>::empty() const {
   return size() == 0;
 }
 
-int rootAdjust = 0;
-
 template <size_t N, typename ElemType, size_t M, size_t m>
 void XTree<N, ElemType, M, m>::insert(const Hyperrectangle<N>& box, const ElemType& value) {
   auto split_node_and_axis = chooseLeaf(root, box, value);
@@ -42,7 +40,7 @@ void XTree<N, ElemType, M, m>::insert(const Hyperrectangle<N>& box, const ElemTy
 }
 
 template <size_t N>
-float getAreaEnlargement(const Hyperrectangle<N>& container, const Hyperrectangle<N>& item) {
+double getAreaEnlargement(const Hyperrectangle<N>& container, const Hyperrectangle<N>& item) {
   Hyperrectangle<N> enlarged_container = container;
   enlarged_container.adjust(item);
   return enlarged_container.getArea() - container.getArea();
@@ -96,6 +94,7 @@ std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>XTree<N, Elem
       const std::shared_ptr<XNode>& n,
       const Hyperrectangle<N>& box,
       const ElemType& value) {
+    //cout << n->size << endl;
   if (!n->isLeaf()) {
     SpatialObject* entry;
     auto next_node = chooseNode(n, box, entry);
@@ -120,12 +119,14 @@ shared_ptr<typename XNODE> XTree<N, ElemType, M, m>::chooseNode(const shared_ptr
         entry = &chosen_entry;
 
     } else {
-        float min_area, min_enlargement;
-        min_area = min_enlargement = FLT_MAX;
+        double min_area, min_enlargement;
+        double area_enlargement, area;
+        min_area = min_enlargement = numeric_limits<double>::max();
 
         for (SpatialObject& current_entry : *current_node) {
-            auto area_enlargement = getAreaEnlargement(current_entry.box, box);
-            auto area = current_entry.box.getArea();
+            int a = current_node->size;
+            area_enlargement = getAreaEnlargement(current_entry.box, box);
+            area = current_entry.box.getArea();
 
             if (area_enlargement < min_enlargement || (area_enlargement == min_enlargement && area < min_area)) {
                 min_enlargement = area_enlargement;

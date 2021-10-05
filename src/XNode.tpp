@@ -40,9 +40,11 @@ const {
 
 template <size_t N, typename ElemType, size_t M, size_t m>
 bool XNODE::isLeaf() {
-  if (!entries.empty() && entries.at(0).child_pointer != nullptr)
-    return false;
-
+    // cout << entries.empty() << endl;
+    if (!entries.empty()){
+        if (entries.at(0).child_pointer != nullptr)
+            return false;
+    }
   return true;
 }
 
@@ -93,8 +95,7 @@ size_t XNODE::chooseSplitAxis(const SpatialObject& new_entry) {
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
-    const SpatialObject& new_entry) {
+std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,const SpatialObject& new_entry) {
   this->entries.push_back(new_entry);
   size_t k = M - 2*m + 2;
 
@@ -117,7 +118,7 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
     for (size_t f1 = 0; f1 < m - 1 + j; ++f1)
       first_group_hr.adjust(this->entries[f1].box);
 
-    for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2) // check if i can merge these 2 for loops11
+    for (size_t f2 = m - 1 + j; f2 < M + 1; ++f2)
       second_group_hr.adjust(this->entries[f2].box);
 
     total_area = first_group_hr.getArea() + second_group_hr.getArea();
@@ -150,7 +151,7 @@ std::shared_ptr<typename XNODE> XNODE::chooseSplitIndex(size_t axis,
 }
 
 template <size_t N, typename ElemType, size_t M, size_t m>
-std::shared_ptr<std::pair<std::shared_ptr<typename XNODE>, size_t>>XNODE::topological_split(const SpatialObject& new_entry) {
+shared_ptr<pair<shared_ptr<typename XNODE>, size_t>>XNODE::topological_split(const SpatialObject& new_entry) {
     auto split_axis = chooseSplitAxis(new_entry);
     auto new_node = chooseSplitIndex(split_axis, new_entry);
     if (!new_node) return nullptr;

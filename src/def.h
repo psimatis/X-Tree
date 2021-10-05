@@ -15,8 +15,8 @@
 #include <array>
 #include <map>
 
-#define DIM 4
-#define CAPACITY 256
+#define DIM 16
+#define CAPACITY 64
 #define MAX_OVERLAP 0.2f
 
 #endif //X_TREE_DEF_H

@@ -22,7 +22,7 @@ struct Hyperrectangle {
   const_iterator begin() const;
   const_iterator end() const;
 
-  float getArea() const;
+  double getArea() const;
 
   float getMargin() const;
 

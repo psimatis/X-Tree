@@ -51,12 +51,13 @@ typename Hyperrectangle<N>::const_iterator Hyperrectangle<N>::end() const {
 }
 
 template <size_t N>
-float Hyperrectangle<N>::getArea() const {
-  float area = 1.f;
+double Hyperrectangle<N>::getArea() const {
+  double area = 1.f;
 
-  for (const auto& interval : bounds)
-    if (interval.end() != interval.begin())
-      area *= (interval.end() - interval.begin());
+  for (const auto& interval : bounds) {
+      if (interval.end() != interval.begin())
+          area *= (interval.end() - interval.begin()); // area sometimes becomes infinite
+  }
 
   return area;
 }
